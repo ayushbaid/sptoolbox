@@ -137,7 +137,6 @@ function y = fftfilt(b, x, varargin)
         y = y(:).';    // turn column back into a row
     end
 
-
 endfunction
 
 
