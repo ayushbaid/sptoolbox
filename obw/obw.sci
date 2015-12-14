@@ -1,4 +1,7 @@
 // Date Of Creation: 9 Dec, 2015
+// TODO: complete documentation
+// TODO: periodogram
+// TODO: plot
 function [bw, flo, fhi, pwr] = obw(varargin)
     // Computes The Occupied Bandwidth
     // Calling Sequence
@@ -20,7 +23,7 @@ function [bw, flo, fhi, pwr] = obw(varargin)
     // freqrange: int|double - 2 element vector - frequency range to be considered
     //      if not specified, the entire bandwidth is considered
     // p: int|double - positive scalar - power percentage
-    // description
+    // Description
     // bw = obw(x)
     //      returns the 99% occupied bandwidth of the input signal x
     // bw = obw(x, fs)
@@ -36,6 +39,14 @@ function [bw, flo, fhi, pwr] = obw(varargin)
     //      the additional output arguments are the lower and upper bounds of the occupied bandwidth, and the power in that bandwidth
     // obw(_)
     //      plots the psd or the power spectrum and annotates the occupied bandwidth
+    // Examples
+    // TODO:
+    // See also
+    // bandpower | periodogram | plomb | powerbw | pwelch
+    // Author
+    // Ayush Baid
+    // References
+    // TODO: 
 
     [lhs rhs] = argn(0);
 
@@ -70,10 +81,11 @@ function [bw, flo, fhi, pwr] = obw(varargin)
         freqrange = varargin($-1);
         p = varargin($);
 
-        if ~IsIntOrDouble(temp2, %T) then
-            error(msprintf(gettext("Wrong type for argument #%d (freqrange); positive vector of 2 elements expected"), rhs-1)); 
+        if ~IsIntOrDouble(freqrange, %T) then
+            disp("error!");
+            error(msprintf(gettext("Wrong type for argument #%d (freqrange); positive vector of 2 elements expected"), (rhs-1))); 
         end
-        if ~IsIntOrDouble(temp3, %F) & temp3>=0 & temp3<=100  then
+        if ~IsIntOrDouble(p, %F) & temp3>=0 & temp3<=100  then
             error(msprintf(gettext("Wrong type for argument #%d (p); 0<p<100"), rhs)); 
         end
         freqrange = double(freqrange)(:);
@@ -119,7 +131,6 @@ function [bw, flo, fhi, pwr] = obw(varargin)
             end
             f = double(temp2);
             primaryInputType = 2;
-            disp("detected pxx and f");
         else
             error("Incorrect arguments");
         end
