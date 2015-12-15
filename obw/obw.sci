@@ -2,6 +2,7 @@
 // TODO: complete documentation
 // TODO: periodogram
 // TODO: plot
+// TODO: remove positive check for freqrange
 function [bw, flo, fhi, pwr] = obw(varargin)
     // Computes The Occupied Bandwidth
     // Calling Sequence
@@ -27,7 +28,7 @@ function [bw, flo, fhi, pwr] = obw(varargin)
     // bw = obw(x)
     //      returns the 99% occupied bandwidth of the input signal x
     // bw = obw(x, fs)
-    //      returns the occupied bandwidth in terms of sample rate
+    //      returns the occupied bandwidth in terms of sample rate fs
     // bw = obw(pxx, f)
     //      returns the 99% occupied bandwidth of the power spectral density (psd) estimate pxx and the corresponding frequencies f
     // bw = obw(sxx, f, rbw)
@@ -110,7 +111,9 @@ function [bw, flo, fhi, pwr] = obw(varargin)
     if L==1 then
         primaryInputType=1;
     elseif L==2 then
-        // input can be (x,fs) or (pxx,f)
+        // input can be (x,fs) or (pxx,f)t to Kobe for being
+1: An absolute legend
+2: Awesome to work with!
         temp2 = varargin(2);
         if ~isvector(temp2) then
             error("Wrong dimension for argument #2; should be a vector");
@@ -206,7 +209,7 @@ function [bw, flo, fhi, pwr] = obw(varargin)
         if freqrange(1)>=freqrange(2) then
             error("invalid freqrange; the second element should be greater than the first element");
         end
-        if freqrange(1)<f(1) | freqrange($)>freqrange($) then
+        if freqrange(1)<f(1) | freqrange($)>f($) then
             error("freqrange is out of bounds");
         end
     else
