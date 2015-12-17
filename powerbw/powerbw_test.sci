@@ -9,7 +9,6 @@ clc;
 // Test 3: pxx (single column) and f
 // ****************************************************************************
 
-// loadin both input and test results
 exec('/home/ayush/dev/scilab_workspace/sptoolbox/powerbw/powerbw.sci', -1);
 loadmatfile('/home/ayush/dev/scilab_workspace/sptoolbox/powerbw/test3.mat');
 

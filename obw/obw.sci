@@ -312,7 +312,7 @@ function result = IsIntOrDouble(inputNum, isPositiveCheck)
         result = %F;
         return
     end
-    if isPositiveCheck & or(inputNum<0) then
+    if isPositiveCheck & or(inputNum<=0) then
         result = %F;
         return
     end

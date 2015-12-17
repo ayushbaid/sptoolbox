@@ -38,3 +38,6 @@ disp(bw);
 disp(flo);
 disp(fhi);
 disp(power);
+
+
+// TODO: test when f is not in an increasing order

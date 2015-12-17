@@ -12,7 +12,7 @@ function [bw, flo, fhi, power] = powerbw(varargin)
     // BW = powerbw(_, FREQRANGE, R)
     // [BW, FLO, FHI, POWER] = powerbw(_)
     // powerbw(_)
-    // parameters
+    // Parameters
     // x: int|double - vector|matrix - input signal
     //      in case of a matrix columns act as independent inputs
     // fs: int|double - positive real scalar - sample rate
@@ -51,6 +51,7 @@ function [bw, flo, fhi, power] = powerbw(varargin)
     //      the additional output arguments are the lower and upper bounds of the occupied bandwidth, and the power in that bandwidth
     // powerbw(_)
     //      plots the psd or the power spectrum and annotates the bandwidth
+    // Examples
     // TODO:
     // See also
     // bandpower | obw | periodogram | plomb | pwelch
@@ -381,7 +382,7 @@ function result = IsIntOrDouble(inputNum, isPositiveCheck)
         result = %F;
         return
     end
-    if isPositiveCheck & or(inputNum<0) then
+    if isPositiveCheck & or(inputNum<=0) then
         result = %F;
         return
     end
