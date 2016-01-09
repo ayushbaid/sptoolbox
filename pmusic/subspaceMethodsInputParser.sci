@@ -11,11 +11,15 @@ function [data, msg] = subspaceMethodsInputParser(inputArgsList)
     //      w - vector
     //      nfft - positive scalar
     //      fs - positive scalar
+    //      isWindowSpecified - boolean indicating if window specified in the 
+    //                          input params
     //      windowLength - positive scalar
     //      windowVector - vector
     //      noverlap - scalar
     //      freqrange - string
     //      isCorrFlag - boolean
+    //      isFsSpecified - boolean indicating if fs argument is present
+    //                      (can be empty)
     // msg - error message (if any)
 
     //  TODO: why max 10 inp arguments for pmusic?
@@ -49,8 +53,8 @@ function [data, msg] = subspaceMethodsInputParser(inputArgsList)
         
         // ****checking for freqrange****
         isOneSided = or(strcmpi(inputArgsList(stringIndices),"onesided")==0);
-        isTwoSided = or(strcmpi(inputArgsList(stringindices),"twosided")==0);
-        isCentered = or(strcmpi(inputArgsList(stringindices),"centered")==0);
+        isTwoSided = or(strcmpi(inputArgsList(stringIndices),"twosided")==0);
+        isCentered = or(strcmpi(inputArgsList(stringIndices),"centered")==0);
     end
     
 
@@ -67,7 +71,7 @@ function [data, msg] = subspaceMethodsInputParser(inputArgsList)
 
     // deleting the string arguments from inputArgsList
     for index=stringIndices
-        inputArgsList(index) = [];
+        inputArgsList(index) = null();
     end
 
 
@@ -90,14 +94,6 @@ function [data, msg] = subspaceMethodsInputParser(inputArgsList)
     if ~IsIntOrDouble(primaryInput, %F) then
         msg = "Wrong type for argument #1; int or double expected";
         return
-    end
-    if isCorrFlag then
-        // primaryInput must be non-negative
-        if or(primaryInput<0) then
-            msg = "Invalid values for argument #1 (correlation matrix); "+...
-            "non-negative values expected";
-            return
-        end
     end
     // covert to a column vector
     if ndims(primaryInput)==1 then
@@ -126,7 +122,7 @@ function [data, msg] = subspaceMethodsInputParser(inputArgsList)
     // 2nd argument, if exists, must be a positive integer'
     if length(p)==2 then
         if ~IsIntOrDouble(p(2),%F) then
-            error("Wrong type for p(2); must be a scalar");
+            msg = "Wrong type for p(2); must be a scalar";
             return 
         end
     end
@@ -135,11 +131,17 @@ function [data, msg] = subspaceMethodsInputParser(inputArgsList)
 
     // assigning default values
     w = [];
-    fs = 1;
+    fs = [];
+    isFsSpecified = %F;
     nfft = 256;
     windowLength = 2*p(1);
-    windowVector = window('re', windowLength);
-    noverlap = windowLength-1;
+    isWindowSpecified = %F;
+    windowVector = [];
+    if windowLength==%inf then
+        windowLength=[];
+    end
+
+    noverlap = [];
 
     if L==3 | L==4 then
         // (x,p,nfft) and (x,p,w) are candidates
@@ -147,7 +149,7 @@ function [data, msg] = subspaceMethodsInputParser(inputArgsList)
 
         // should be a vector
         if ndims(temp3)~=1 then
-            error("Wrong dimension for argument #3; must be a scalar|vector");
+            msg = "Wrong dimension for argument #3; must be a scalar|vector";
             return
         end
 
@@ -156,7 +158,7 @@ function [data, msg] = subspaceMethodsInputParser(inputArgsList)
 
             // positive integer check
             if ~type(temp3)==8 | temp3<=0 then
-                error("Wrong type for argument #3 (nfft); must be a positive integer");
+                msg = "Wrong type for argument #3 (nfft); must be a positive integer";
                 return
             end
             nfft = temp3;
@@ -165,7 +167,7 @@ function [data, msg] = subspaceMethodsInputParser(inputArgsList)
 
             // numeric type check
             if ~IsIntOrDouble(temp3) then
-                error("Wrong type for argument #3 (w); must be int or double");
+                msg = "Wrong type for argument #3 (w); must be int or double";
                 return
             end
             w = double(temp3(:)); 
@@ -173,36 +175,35 @@ function [data, msg] = subspaceMethodsInputParser(inputArgsList)
 
     end
 
-    if L==4 | L==6 then
+    if L==4 | L==5 | L==6 then
         // 4th argument will be fs
         temp4 = inputArgsList(4);
-        if ~length(temp4)==1 then
-            error("Wrong size for argument #4 (fs); must be a positive scalar");
-            return
-        end
+        isFsSpecified = %T;
+        if length(temp4)==1 then
 
-        if ~IsIntOrDouble(temp4, %T) then
-            error("Wrong type for argument #4 (fs); must be a positive scalar");
-            return
+            if ~IsIntOrDouble(temp4, %T) then
+                msg = "Wrong type for argument #4 (fs); must be a positive scalar";
+                return
+            end
+            fs = double(temp4);
         end
-        fs = double(temp4);
     end
 
-    if L==6 then
-        // must be (x,p,nfft,fs,nwin,noverlap)
-        [temp3, temp4, temp5, temp6] = inputArgsList(3:6);
+    if L==5 | L==6 then
+        // must be (x,p,nfft,fs,nwin [,noverlap])
+        [temp3, temp4, temp5] = inputArgsList(3:5);
 
         if length(temp3)==1 then
             // must be nfft
 
             // positive integer check
-            if ~type(temp3)==8 | temp3<=0 then
-                error("Wrong type for argument #3 (nfft); must be a positive integer");
+            if ~IsIntOrDouble(temp3,%T) then
+                msg = "Wrong type for argument #3 (nfft); must be a positive integer";
                 return
             end
-            nfft = temp3;
+            nfft = int(temp3);
         elseif ~isempty(temp3) then
-            error("Wrong type for argument #3 (nfft); must be a positive integer");
+            msg = "Wrong type for argument #3 (nfft); must be a positive integer";
             return
         end            
 
@@ -211,35 +212,42 @@ function [data, msg] = subspaceMethodsInputParser(inputArgsList)
         // parsing window paramater
         if length(temp5)==1 then
             // window length is specified
-            if ~type(temp5)==8 | temp5<=0 then
-                error("Wrong type for argument #5 (nwin); must be a positive integer or a numeric vector");
+            if ~IsIntOrDouble(temp5,%T) then
+                msg = "Wrong type for argument #5 (nwin); must be a positive integer or a numeric vector";
                 return
             end
-            windowLength = temp5;
-            windowVector = window('re',windowLength);
+            windowLength = int(temp5);
+            isWindowSpecified = %T;
+            // windowVector = window('re',windowLength);
         elseif ndims(temp5)==1 then
             // window is specified
             if ~IsIntOrDouble(temp5, %F) then
-                error("Wrong type for argument #5 (nwin); must be a positive integer or a numeric vector");
+                msg = "Wrong type for argument #5 (nwin); must be a positive integer or a numeric vector";
                 return
             end
             windowVector = double(temp5(:));
             windowLength = length(windowVector);
+            isWindowSpecified = %T;
         elseif ~isempty(temp5) then
-            error("Wrong type for argument #5 (nwin); must be a positive integer or a numeric vector");
+            msg = "Wrong type for argument #5 (nwin); must be a positive integer or a numeric vector";
             return
         end
         
-        // parsing noverlap
-        if length(temp6)==1 then
-            if ~type(temp6)==8 | temp6<0 then
-                error("Wrong type for argument #6 (noverlap); must be a non-negative integer");
+        if L==6 then
+            temp6 = varargin(6);
+            // parsing noverlap
+            if length(temp6)==1 then
+                if ~(type(temp6)==8 | type(temp6)==1)| temp6<0 then
+                    msg = "Wrong type for argument #6 (noverlap); must be a non-negative integer";
+                end
+                noverlap = int(temp6);
+            elseif isempty(temp6) then
+                noverlap = windowLength-1;           
+            else
+                msg = "Wrong type for argument #6 (noverlap); must be a non-negative integer";
             end
-            noverlap = temp6;
-        elseif isempty(temp6) then
-            noverlap = windowLength-1;
         else
-            error("Wrong type for argument #6 (noverlap); must be a non-negative integer");
+            noverlap = windowLength-1; 
         end
     end
     
@@ -265,11 +273,13 @@ function [data, msg] = subspaceMethodsInputParser(inputArgsList)
     data.w = w;
     data.nfft = nfft;
     data.fs = fs;
+    data.isWindowSpecified = isWindowSpecified;
     data.windowLength = windowLength;
     data.windowVector = windowVector;
     data.noverlap = noverlap;
     data.freqrange = freqrange;
     data.isCorrFlag = isCorrFlag;
+    data.isFsSpecified = isFsSpecified;
 
 
 endfunction

@@ -69,11 +69,14 @@ function [S,f,v,e] = pmusic(varargin)
     // [2] S. J. Orfanidis, Optimum Signal Processing. An Introduction. 
     //     2nd Ed., Macmillan, 1988.
     
+    funcprot(0);
+    
+    exec('/home/ayush/dev/scilab_workspace/sptoolbox/pmusic/subspaceMethodsInputParser.sci',-1);
+    exec('/home/ayush/dev/scilab_workspace/sptoolbox/pmusic/musicBase.sci',-1);
 
-
-    disp("start");
+    // ("**start**");
     [data, msg] = subspaceMethodsInputParser(varargin);
-    disp("input parsed");
+    // disp("**input parsed**");
 
     if length(msg)==0 then
         // no error occured
@@ -90,7 +93,7 @@ function [S,f,v,e] = pmusic(varargin)
 
     // computing the pseudospectrum
     [S,f] = pseudospectrum(musicData.noiseEigenvects, ...
-    musicData.eigenvals,data.nfft, data.fs, data.freqrange);
+    musicData.eigenvals,data.nfft, data.fs, data.freqrange,data.isFsSpecified);
         
     v = musicData.noiseEigenvects;
     e = musicData.eigenvals;
@@ -98,21 +101,27 @@ function [S,f,v,e] = pmusic(varargin)
 endfunction
 
 function [pspec,w] = pseudospectrum(noiseEigenvects, eigenvals, nfft, fs, ...
-    freqrange)
+    freqrange,isFsSpecified)
     // TODO: EVFlag
-
+    // disp("noise eigenvects in pseudospectrum - ");
+    // disp(noiseEigenvects);
     weights = ones(1,size(noiseEigenvects,2));
 
     denominator = 0;
 
     for i=1:size(noiseEigenvects,2);
-        [h,w] = computeFreqResponse(noise_eigenvects(:,i),1,nfft,fs);
+        // disp("looping in pseudospectrum");
+        [h,w] = computeFreqResponseByFFT(noiseEigenvects(:,i),nfft,fs,...
+                        isFsSpecified);
         denominator = denominator + (abs(h).^2)./weights(i);
+        // disp(h(1:10));
     end
     
+    // disp(denominator(1:5));
     // computing pseudospectrum pspec
-    pspec = 1./denominator;
-    
+    pspec = 1.0 ./ denominator;
+    // converting to column vector
+    pspec = pspec(:);
     // correcting the range of pspec according to the user specification
     if strcmpi(freqrange, 'onesided') then
         if modulo(nfft,2) then
@@ -144,33 +153,35 @@ function [pspec,w] = pseudospectrum(noiseEigenvects, eigenvals, nfft, fs, ...
 
 endfunction
 
-function [h,w] = computeFreqResponse(b,a,n,fs)
+// TODO: implement freqresponse for given f vector
+function [h,w] = computeFreqResponseByFFT(b,n,fs,isFsSpecified)
     // returns the frequency response (h) and the corresponding frequency 
     // values (w) for a digital filter with numerator b and denominator a. The 
     // evaluation of the frequency response is done at n points between 0 and fs.
     //
     // Similar to MATLAB's freqz(b,a,n,'whole',fs)
-
-    w = linspace(0,fs,n);
-    w(1) = 0;   // forcing the first frequency to be 0
-
-    maxPower = max(length(b),length(a));
-
-    // creating a matrix which contains all the required powers of w
-    wMatrix = zeros(maxPower,n);
-
-    for i=1:maxPower
-        wMatrix(i,:) = w.^(-i);
+    if isempty(fs) then
+        fs=1;
     end
+    w = linspace(0,2*%pi*fs,n+1)';
+    w($) = [];
+    w(1) = 0;   // forcing the first frequency to be 0
+    
+    // forcing b and a to be column vectors
+    b = b(:);
+    
+    // zero padding for fft
+    zeroPadLength = n - length(b);
+    zeroPad = zeros(zeroPadLength,1);
+    b = [b; zeroPad];
 
-    // forcing b and a to be a row vector
-    b = b(:)';
-    a = a(:)';
 
-    numerator = b*wMatrix;
-    denominator = a*wMatrix;
-
-    h = numerator./denominator;
+    h = fft(b);
+    
+    if isFsSpecified then
+        w = w/(2*%pi);
+    end
+    
 endfunction
 
 
