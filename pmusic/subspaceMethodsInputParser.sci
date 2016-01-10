@@ -8,7 +8,7 @@ function [data, msg] = subspaceMethodsInputParser(inputArgsList)
     // data - struct with the following arguments
     //      x - input signal or correlation matrix
     //      p - scalar|2-element vector - signal subspace parameters
-    //      w - vector
+    //      w/f - vector
     //      nfft - positive scalar
     //      fs - positive scalar
     //      isWindowSpecified - boolean indicating if window specified in the 

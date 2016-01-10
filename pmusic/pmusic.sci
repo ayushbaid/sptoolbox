@@ -93,15 +93,15 @@ function [S,f,v,e] = pmusic(varargin)
 
     // computing the pseudospectrum
     [S,f] = pseudospectrum(musicData.noiseEigenvects, ...
-    musicData.eigenvals,data.nfft, data.fs, data.freqrange,data.isFsSpecified);
+    musicData.eigenvals,data.w,data.nfft, data.fs, data.freqrange,data.isFsSpecified);
         
     v = musicData.noiseEigenvects;
     e = musicData.eigenvals;
 
 endfunction
 
-function [pspec,w] = pseudospectrum(noiseEigenvects, eigenvals, nfft, fs, ...
-    freqrange,isFsSpecified)
+function [pspec,w] = pseudospectrum(noiseEigenvects, eigenvals, freqvector, ...
+    nfft, fs, freqrange,isFsSpecified)
     // TODO: EVFlag
     // disp("noise eigenvects in pseudospectrum - ");
     // disp(noiseEigenvects);
@@ -111,8 +111,14 @@ function [pspec,w] = pseudospectrum(noiseEigenvects, eigenvals, nfft, fs, ...
 
     for i=1:size(noiseEigenvects,2);
         // disp("looping in pseudospectrum");
-        [h,w] = computeFreqResponseByFFT(noiseEigenvects(:,i),nfft,fs,...
-                        isFsSpecified);
+        if isempty(freqvector) then
+            [h,w] = computeFreqResponseByFFT(noiseEigenvects(:,i),nfft,fs,...
+                            isFsSpecified);
+        else
+            h = computeFreqResponseByPolyEval(noiseEigenvects(:,i),...
+                            freqvector,fs,isFsSpecified);
+            w = freqvector;
+        end
         denominator = denominator + (abs(h).^2)./weights(i);
         // disp(h(1:10));
     end
@@ -156,14 +162,14 @@ endfunction
 // TODO: implement freqresponse for given f vector
 function [h,w] = computeFreqResponseByFFT(b,n,fs,isFsSpecified)
     // returns the frequency response (h) and the corresponding frequency 
-    // values (w) for a digital filter with numerator b and denominator a. The 
-    // evaluation of the frequency response is done at n points between 0 and fs.
+    // values (w) for a digital filter with numerator b. The evaluation of the 
+    // frequency response is done at n points in [0,fs) using fft algorithm
     //
     // Similar to MATLAB's freqz(b,a,n,'whole',fs)
     if isempty(fs) then
         fs=1;
     end
-    w = linspace(0,2*%pi*fs,n+1)';
+    w = linspace(0,2*%pi/fs,n+1)';
     w($) = [];
     w(1) = 0;   // forcing the first frequency to be 0
     
@@ -179,9 +185,33 @@ function [h,w] = computeFreqResponseByFFT(b,n,fs,isFsSpecified)
     h = fft(b);
     
     if isFsSpecified then
-        w = w/(2*%pi);
+        w = w*fs/(2*%pi);
     end
     
+endfunction
+
+function h = computeFreqResponseByPolyEval(b,f,fs,isFsSpecified)
+    // returns the frequency response (h) for a digital filter with numerator b.
+    // The evaluation of the frequency response is done at frequency values f
+    
+    f = f(:);
+    b = b(:);
+    if isFsSpecified then
+        // normalizing the f vector
+        w = f*2*%pi/fs;
+    else
+        w = f;
+    end
+    
+    n = length(b);
+    powerMatrix = zeros(length(f),n);
+    powerMatrix(:,1) = 1;
+    for i=2:n
+        powerMatrix(:,i) = exp(2*%pi*f*(-i+1)*%i/fs);
+    end
+    
+    h = powerMatrix*b;
+     
 endfunction
 
 
