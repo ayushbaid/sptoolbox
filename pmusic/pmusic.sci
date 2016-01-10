@@ -71,8 +71,8 @@ function [S,f,v,e] = pmusic(varargin)
     
     funcprot(0);
     
-    exec('/home/ayush/dev/scilab_workspace/sptoolbox/pmusic/subspaceMethodsInputParser.sci',-1);
-    exec('/home/ayush/dev/scilab_workspace/sptoolbox/pmusic/musicBase.sci',-1);
+    exec('subspaceMethodsInputParser.sci',-1);
+    exec('musicBase.sci',-1);
 
     // ("**start**");
     [data, msg] = subspaceMethodsInputParser(varargin);
@@ -102,7 +102,6 @@ endfunction
 
 function [pspec,w] = pseudospectrum(noiseEigenvects, eigenvals, freqvector, ...
     nfft, fs, freqrange,isFsSpecified)
-    // TODO: EVFlag
     // disp("noise eigenvects in pseudospectrum - ");
     // disp(noiseEigenvects);
     weights = ones(1,size(noiseEigenvects,2));
@@ -129,7 +128,7 @@ function [pspec,w] = pseudospectrum(noiseEigenvects, eigenvals, freqvector, ...
     // converting to column vector
     pspec = pspec(:);
     // correcting the range of pspec according to the user specification
-    if strcmpi(freqrange, 'onesided') then
+    if strcmpi(freqrange, 'onesided')==0 then
         if modulo(nfft,2) then
             // nfft is odd
             range = 1:(1+nfft)/2;
@@ -138,7 +137,7 @@ function [pspec,w] = pseudospectrum(noiseEigenvects, eigenvals, freqvector, ...
         end
         pspec = pspec(range);
         w = w(range);
-    elseif strcmpi(freqrange,'centered') then
+    elseif strcmpi(freqrange,'centered')==0 then
         // convert two sided spectrum to centered
         rem = modulo(nfft,2);
         
@@ -159,7 +158,6 @@ function [pspec,w] = pseudospectrum(noiseEigenvects, eigenvals, freqvector, ...
 
 endfunction
 
-// TODO: implement freqresponse for given f vector
 function [h,w] = computeFreqResponseByFFT(b,n,fs,isFsSpecified)
     // returns the frequency response (h) and the corresponding frequency 
     // values (w) for a digital filter with numerator b. The evaluation of the 
@@ -169,7 +167,7 @@ function [h,w] = computeFreqResponseByFFT(b,n,fs,isFsSpecified)
     if isempty(fs) then
         fs=1;
     end
-    w = linspace(0,2*%pi/fs,n+1)';
+    w = linspace(0,2*%pi,n+1)';
     w($) = [];
     w(1) = 0;   // forcing the first frequency to be 0
     

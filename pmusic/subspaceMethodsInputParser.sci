@@ -53,20 +53,18 @@ function [data, msg] = subspaceMethodsInputParser(inputArgsList)
         
         // ****checking for freqrange****
         isOneSided = or(strcmpi(inputArgsList(stringIndices),"onesided")==0);
-        isTwoSided = or(strcmpi(inputArgsList(stringIndices),"twosided")==0);
+        isTwoSided = or(strcmpi(inputArgsList(stringIndices),"twosided")==0 ...
+                    | strcmpi(inputArgsList(stringIndices),"whole")==0);
         isCentered = or(strcmpi(inputArgsList(stringIndices),"centered")==0);
     end
     
-
-
     freqrange = "";
-    // assign randomly in case of ambiguity
-    if isOneSided then
-        freqrange = "onesided";
-    elseif isTwoSided then
+    if isTwoSided then
         freqrange = "twosided";
-    else
+    elseif isCentered then
         freqrange = "centered";
+    else
+        freqrange = "onesided";
     end
 
     // deleting the string arguments from inputArgsList
