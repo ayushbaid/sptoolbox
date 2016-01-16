@@ -47,7 +47,6 @@ end
 
 
 // ** C) 2 output arguments
-[out1,out2] = uencode([1,2,3],5,1);
 try
     [out1,out2] = uencode([1,2,3],5,1);
 catch
