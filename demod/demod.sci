@@ -157,7 +157,7 @@ function [x, x2] = demod(y, fc, fs, varargin)
         end
     
     else
-        error("Incorrect modulation technique");
+        error("Incorrect modulation technique specified");
     end
     
 

@@ -47,26 +47,26 @@ exec('/home/ayush/dev/scilab_workspace/sptoolbox/demod/demod.sci', -1)
 // RESULT: perfect match
 
 // PPM
-//fs = 8000;
-//t = (0:1000-1)'/fs;
-//s = 0.25*cos(2*%pi*500*t)+0.5;
-//x = modulate(s,2e3,fs, 'ppm');
-//
-//rx = x;
-//y = demod(rx,2e3,fs, 'ppm');
+fs = 8000;
+t = (0:1000-1)'/fs;
+s = 0.25*cos(2*%pi*500*t)+0.5;
+x = modulate(s,2e3,fs, 'ppm');
+
+rx = x;
+y = demod(rx,2e3,fs, 'ppm');
 // RESULT: incorrect modulation
 
 // QAM
-fs = 8000;
-t = (0:1000-1)'/fs;
-s1 = 4*cos(2*%pi*500*t);
-s2 = 4*cos(2*%pi*300*t);
-x = modulate(s1,3e3,fs, 'qam',s2);
-
-rx = x;
-[y1,y2] = demod(rx,3e3,fs, 'qam');
+//fs = 8000;
+//t = (0:1000-1)'/fs;
+//s1 = 4*cos(2*%pi*500*t);
+//s2 = 4*cos(2*%pi*300*t);
+//x = modulate(s1,3e3,fs, 'qam',s2);
+//
+//rx = x;
+//[y1,y2] = demod(rx,3e3,fs, 'qam');
 
 // RESULT - shift by one + values inconsistent
 
-plot(y1(1:100));
-plot(y2(1:100),'r');
+plot(x(1:100));
+plot(y(1:100),'r');

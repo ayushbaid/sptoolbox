@@ -205,7 +205,7 @@ function h = computeFreqResponseByPolyEval(b,f,fs,isFsSpecified)
     powerMatrix = zeros(length(f),n);
     powerMatrix(:,1) = 1;
     for i=2:n
-        powerMatrix(:,i) = exp(2*%pi*f*(-i+1)*%i/fs);
+        powerMatrix(:,i) = exp(w*(-i+1)*%i);
     end
     
     h = powerMatrix*b;
