@@ -78,14 +78,18 @@ function [w,pow] = rootmusic(x,p,varargin)
     varargLength = length(varargin);
     // searching for the 'corr' flag
     isCorrFlag = %F;
-    stringIndices = find(type(varargin(1:varargLength))==10);
+    
+    if varargLength==0 then
+        stringIndices = [];
+    else
+        stringIndices = find(type(varargin(1:varargLength))==10);
+    end
     
     if ~isempty(stringIndices) then
         // ignoring all other strings except the corr flag
         isCorrFlag = or(strcmpi(varargin(stringIndices),"corr")==0);
+        varargin(stringIndices) = [];
     end
-    
-    varargin(stringIndices) = [];
     
     // varargin can have only an entry for fs
     if length(varargin)==1 then
@@ -107,7 +111,7 @@ function [w,pow] = rootmusic(x,p,varargin)
     end
     
     // extracting primary input x/R
-    primaryInput = varargin(1);
+    primaryInput = x;
 
     if ndims(primaryInput)<1 | ndims(primaryInput)>2 then
         msg = "Wrong dimension for argument #1; Vector or a matrix expected";
@@ -152,7 +156,7 @@ function [w,pow] = rootmusic(x,p,varargin)
     isXReal = isreal(x)
     if ~isCorrFlag then
         // check that p(1) should be even if x is real
-        if isXReal & module(p(1),2)~=0 then
+        if isXReal & modulo(p(1),2)~=0 then
             msg = "Wrong input argument #2 p(1); " + ...
                 " An even value expected for real input x";
             error(msg,10036);
@@ -204,6 +208,12 @@ function [w,pow] = rootmusic(x,p,varargin)
     
     pow = computePower(outData.signalEigenvects,eigenvals,w,pEffective,...
                 sigma_noise,isXReal);
+                
+                
+    // is fs is specified, convert normailized frequencies to actual frequencies
+    if isFsSpecified then
+        w = w*fs/(2*%pi);
+    end
     
     
 endfunction
