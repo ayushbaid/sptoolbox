@@ -118,11 +118,11 @@ function [w,pow] = rootmusic(x,p,varargin)
     primaryInput = x;
 
     if ndims(primaryInput)<1 | ndims(primaryInput)>2 then
-        msg = "Wrong dimension for argument #1; Vector or a matrix expected";
+        msg = "rootmusic: Wrong dimension for argument #1; Vector or a matrix expected";
         error(msg,10053);
     end
     if ~IsIntOrDouble(primaryInput, %F) then
-        msg = "Wrong type for argument #1; Numeric vector or a matrix expected";
+        msg = "rootmusic: Wrong type for argument #1; Numeric vector or a matrix expected";
         error(msg,10053);
     end
     // covert to a column vector
@@ -136,13 +136,13 @@ function [w,pow] = rootmusic(x,p,varargin)
     //****extracting p****
     // p must be either scalar or a 2-element vector
     if length(p)~=1 & length(p)~=2 then
-        msg = "Wrong type for argument #2 (p); " + ...
+        msg = "rootmusic: Wrong type for argument #2 (p); " + ...
             "A scalar or a 2-element vector expected";
         error(msg,10053);
     end
     // first argument of p must be an integer
     if ~IsIntOrDouble(p(1),%T) then
-        msg = "Wrong input argument #2 p(1); " + ... 
+        msg = "rootmusic: Wrong input argument #2 p(1); " + ... 
             "positive integer expected";
         error(msg,10036);
         return
@@ -152,7 +152,7 @@ function [w,pow] = rootmusic(x,p,varargin)
     // 2nd argument, if exists, must be a positive integer'
     if length(p)==2 then
         if ~IsIntOrDouble(p(2),%F) then
-            msg = "Wrong type for argument #2 p(2); must be a scalar";
+            msg = "rootmusic: Wrong type for argument #2 p(2); must be a scalar";
             error(msg,10053); 
         end
     end
@@ -161,7 +161,7 @@ function [w,pow] = rootmusic(x,p,varargin)
     if ~isCorrFlag then
         // check that p(1) should be even if x is real
         if isXReal & modulo(p(1),2)~=0 then
-            msg = "Wrong input argument #2 p(1); " + ...
+            msg = "rootmusic: Wrong input argument #2 p(1); " + ...
                 " An even value expected for real input x";
             error(msg,10036);
         end
