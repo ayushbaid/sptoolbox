@@ -30,8 +30,12 @@ function [w,pow] = rootmusic(x,p,varargin)
     //      x must be a square matrix and all its eigenvalues must be 
     //      nonnegative
     //
-    // Examples
-    // TODO:
+    // Examples:
+    //      1) 3 complex exponentials:
+    //
+    //          n=0:99;   
+    //          s=exp(1i*pi/2*n)+2*exp(1i*pi/4*n)+exp(1i*pi/3*n)+randn(1,100);  
+    //          [W,P] = rootmusic(s,3);
     //
     // Author
     // Ayush
