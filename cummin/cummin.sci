@@ -163,19 +163,19 @@ function out = cumminVec(inp,isForward)
         prevMag = magVec(startIndex);
         prevPhase = phaseVec(startIndex);
         
-        disp(magVec);
-        disp(phaseVec);
+        //disp(magVec);
+        //disp(phaseVec);
         
         for i=startIndex+step:step:endIndex
-            disp(i);
+            //disp(i);
             currentMag = magVec(i);
             if magVec(i)<prevMag-%eps then
-                disp("mag1");
+                //disp("mag1");
                 out(i) = inp(i);
                 prevMag = magVec(i);
                 prevPhase = phaseVec(i);
             elseif magVec(i)>prevMag+%eps then
-                disp("mag2");
+                //disp("mag2");
                 out(i) = out(i-step);
             else
                 if abs(phaseVec(i))>abs(prevPhase) then
