@@ -1,66 +1,109 @@
 function y = fftfilt(b, x, varargin)
-    // This function performs FFT-based FIR filtering using overlap-add method
+    // Performs FFT-based FIR filtering using overlap-add method
+    // 
     // Calling sequence
     // y = fftfilt(b,x)
     // y = fftfilt(b,x,n)   
-    // y = fftfilt(d,x)
-    // y = fftfilt(d,x,n)
+    // 
     // Parameters
-    // x: data vector
-    // b: filter coefficients vector
-    // n: used to determine the length of the fft
-    // d: digitalFilter object
+    // x: real|complex numbers -  vector|matrix
+    //      Input data to be filtered
+    //      If x is a matrix, each column is treated as an independent observation.
+    // b: real|complex numbers - vector|matrix
+    //      Filter coefficients
+    //      If b is a matrix and x is a vector, each column is treated as an 
+    //      independent filter. If both x and b are matrices, each column of x
+    //      if filtered using corresponding column of b.
+    // n: positive integer
+    //      Parameter used to determine the length of the fft
+    //
     // Description
-    // y = fftfilt(b,x) filters the data in vector x with the filter described by coefficient vector b. It returns the data vector y.
+    // y = fftfilt(b,x) filters the data in vector x with the filter described 
+    //                  by coefficient vector b.
     // y = fftfilt(b,x,n) uses n to determine the length of the FFT.
-    // y = fftfilt(d,x) filters the data in vector x with a digitalFilter object, d.
-    // y = fftfilt(d,x,n) uses n to determine the length of the FFT.
+    //
+    // Examples
+    // 1) Filtering a sine wave
+    //      x = sin(1:2000);
+    //      b = [1 1/2];
+    //      y = fftfilt(b,x);
+    // 2) Multiple filters (1,1/3) and (1/4,1/5);
+    //      x = sin(1:2000);
+    //      b = [1 1/4;1/3 1/5];
+    //      y = fftfilt(b,x);
+    //
     // Authors
-    // Ayush
+    // Ayush Baid
 
 
-    // Not implementing gpuArray based function
-
-    // TODO: add multicolumn support
 
 
-    [lhs, rhs] = argn(0);
-
-    // performing input arguments number check
-    if rhs==3 then
-        if length(varargin)>1 then
-            error(msprintf(gettext("%s: Wrong number of input arguments: %d to %d expected.\n"), "atomsInstall", 1, 2));
-        end,
-        n = varargin(1);
-    elseif rhs~=2 then
-        error(msprintf(gettext("%s: Wrong number of input arguments: %d to %d expected.\n"), "atomsInstall", 1, 2));
+    [numOutArgs,numInArgs] = argn(0);
+    
+// ** Checking number of arguments
+    
+    if numInArgs<1 | numInArgs>3 then
+        msg = "fftfilt: Wrong number of input argument; 1-3 expected";
+        error(77,msg);
+    end
+    
+    if numOutArgs~=1 then
+        msg = "fftfilt: Wrong number of output argument; 1 expected";
+        error(78,msg);
+    end
+    
+    
+    
+// ** checking the type of input arguments **
+    
+    // b should contain numeric entries
+    if ~(type(b)==1 | type(b)==8 | type(b)==17) then
+        msg = "fftfilt: Wrong type for argument #1 (b); Real or complex entries expected ";
+        error(53,msg);
+    end
+    
+    // x should contain numeric entries
+    if ~(type(x)==1 | type(x)==8 | type(x)==17) then
+        msg = "fftfilt: Wrong type for argument #2 (x); Real or complex entries expected ";
+        error(53,msg);
+    end
+    temp = size(x,1);
+    
+    // b and x must have compatible dimensions
+    inpType = 0; 
+    if size(b,1)==1 | size(b,2)==1 then
+        // b is a vector; hence x can be a matrix
+        inpType = 1;
+        // if x is a vector; it should be a column vector
+        if size(x,1)==1 then
+            x = x';
+        end
+        
+        // covert b to column vector
+        b = b(:);
+    else
+        // b is a matrix, hence x should either be a vector or a matrix with 
+        // same number of columns
+        
+        if size(x,1)==1 | size(x,2)==1 then
+            inpType = 2;
+            x = x(:);
+        else 
+            // check compatibility
+            if size(b,2)~=size(x,2) then
+                msg = "fftfilt: Wrong size for arguments #1 (b) and #2 (x); Must have same number of columns";
+                error(60,msg);
+            end
+            inpType = 3;
+        end        
     end
 
-    // performing input arguments type check
-    // TODO:
-
-    // check if input is a column vector; else convert it into column
-    m = size(x,1);
-    if m==1 then
-        x = x(:);
-    end
 
     // getting the length of data vector x
     nx = size(x,1);
-
-
-    // TODO: What is this?
-    if min(size(b))>1 then
-        if ((size(b,2)~=size(x,2)) & (size(x,2)>1)) then
-            error(message('signal:fftfilt:InvalidDimensions'))
-        end,
-    else
-        b = b(:);   // make input a column
-    end
-
     nb = size(b,1);
 
-    if rhs==2 then // the param n was not passed
+    if numInArgs==2 then // the param n was not passed
         // figure out the nfft (length of the fft) and L (length of fft inp block)to be used
         if (nb>=nx | nb>2^20) then 
             // take a single fft
@@ -82,8 +125,6 @@ function y = fftfilt(b, x, varargin)
 
         end,
     else  // nfft is given
-        // TODO: Cast to enforce precision rules
-        // nfft = signal.internal.sigcasttofloat(nfft,'double','fftfilt','N','allownumeric');
         if nfft < nb then
             nfft = nb;
         end,
@@ -95,13 +136,22 @@ function y = fftfilt(b, x, varargin)
 
     if nb<nfft then
         // perform padding
-        temp = zeros(nfft-nb,1);
+        temp = zeros(nfft-nb,size(b,2));
         b = [b; temp];
     end
-    B = fft(b);
+    B = fft(b,-1,1);
+    
+    // replication x or b to match the number of columns
+    if inpType==1 & size(x,2)~=1 then
+        B = B(:,ones(1,size(x,2)));
+    elseif inpType==2 then
+        x = x(:,ones(1,size(b,2)));
+    end
+    
+
     
     y=zeros(size(x,1),size(x,2));
-
+    
     blockStartIndex = 1;
     while blockStartIndex <= nx,
         blockEndIndex = min(blockStartIndex+L-1, nx);
@@ -110,17 +160,17 @@ function y = fftfilt(b, x, varargin)
             // just a scalar in the block
             X = x(blockStartIndex(ones(nfft,1)),:);
         else
-            block = x(blockStartIndex:blockEndIndex);
+            block = x(blockStartIndex:blockEndIndex,:);
             // performing padding
             temp = nfft-(blockEndIndex-blockStartIndex)-1;
             if temp>0 then
-                pad = zeros(temp,1);
+                pad = zeros(temp,size(block,2));
                 block = [block; pad];   
-            end,
+            end
 
-            X = fft(block);
-        end,
-        Y = ifft(X.*B);
+            X = fft(block,-1,1);
+        end
+        Y = fft(X.*B,1,1);
 
         yEndIndex = min(nx, blockStartIndex+nfft-1);
 
@@ -128,12 +178,14 @@ function y = fftfilt(b, x, varargin)
 
         blockStartIndex = blockStartIndex+L;
     end
-
+    
+    
+    // if both data and filter coeffs were real, the output should be real
     if ~(or(imag(b(:))) | or(imag(x(:)))) then
         y = real(y);
     end
 
-    if ((m == 1) & (size(y,2) == 1)) then
+    if temp==1 & inpType==1 then
         y = y(:).';    // turn column back into a row
     end
 
