@@ -68,3 +68,11 @@ loadmatfile('test5.mat');
 assert_checkalmostequal(P5_1,P5);
 assert_checkalmostequal(f5_1,f5);
 
+
+// ****************************************************************************
+// Test 6: Plot test
+// ****************************************************************************
+loadmatfile('test1.mat');
+pmusic(x,4);
+
+

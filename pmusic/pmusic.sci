@@ -73,6 +73,15 @@ function [S,f,v,e] = pmusic(varargin)
     
     exec('subspaceMethodsInputParser.sci',-1);
     exec('musicBase.sci',-1);
+    
+    [numOutArgs,numInArgs] = argn(0);
+    disp(numOutArgs);
+    
+    // check number of output arguments
+    if numOutArgs~=0 & numOutArgs~=2 & numOutArgs~=4 then
+        msg = "pmusic: Wrong number of output argument; 0,2, or 4 expected";
+        error(78,msg);
+    end
 
     // ("**start**");
     [data, msg] = subspaceMethodsInputParser(varargin);
@@ -97,6 +106,22 @@ function [S,f,v,e] = pmusic(varargin)
         
     v = musicData.noiseEigenvects;
     e = musicData.eigenvals;
+    
+    // plot if requested
+    if numOutArgs==0 then
+        pow = 10*log10(S);
+        figure()
+        plot(f,pow);
+        
+        if data.isFsSpecified then
+            xlabel('Frequency (Hz)');
+        else
+            xlabel('Normalized Frequency (*pi rad/sample)');
+        end
+        
+        ylabel('Power (dB)');
+        title('Pseudospectrum Estimate via MUSIC');
+    end
 
 endfunction
 
