@@ -1,10 +1,7 @@
 // Date Of Creation: 9 Dec, 2015
-// TODO: complete documentation
-// TODO: periodogram
-// TODO: plot
-// TODO: remove positive check for freqrange
 function [bw, flo, fhi, pwr] = obw(varargin)
     // Computes The Occupied Bandwidth
+    //
     // Calling Sequence
     // BW = obw(X)
     // BW = obw(X, FS)
@@ -13,41 +10,63 @@ function [bw, flo, fhi, pwr] = obw(varargin)
     // BW = obw(_, FREQRANGE, P)
     // [BW, FLO, FHI, POWER] = obw(_)
     // obw(_)
-    // parameters
-    // x: int|double - vector|matrix - input signal
-    //      in case of a matrix columns act as independent inputs
-    // fs: int|double - positive real scalar - sample rate
-    // pxx: int|double - vector|matrix - power spectral density
-    // f: int|double - vector - frequencies corresponding to pxx
-    // sxx: int|double - vector|matrix - power spectral estimate
-    // rbw: int|double - positive scalar - resolution bandwidth
-    // freqrange: int|double - 2 element vector - frequency range to be considered
-    //      if not specified, the entire bandwidth is considered
-    // p: int|double - positive scalar - power percentage
+    //
+    // Parameters
+    // x: int|double - vector|matrix
+    //      Input Signal
+    //      In case of a matrix columns act as independent inputs
+    // fs: int|double - positive real scalar
+    //      Sampling Rate
+    // pxx: int|double - vector|matrix
+    //      Power Spectral Density
+    // f: int|double - vector
+    //      Frequencies
+    //      Frequencies corresponding to pxx
+    // sxx: int|double - vector|matrix
+    //      Power Spectral Estimate
+    // rbw: int|double - positive scalar
+    //      Resolution Bandwidth
+    // freqrange: int|double - 2 element vector
+    //      Frequency Range To Be Considered
+    //      If not specified, the entire bandwidth is considered
+    // p: int|double - positive scalar
+    //      Power Percentage
+    //
     // Description
     // bw = obw(x)
-    //      returns the 99% occupied bandwidth of the input signal x
+    //      returns the 99% occupied bandwidth of the input signal x.
     // bw = obw(x, fs)
-    //      returns the occupied bandwidth in terms of sample rate fs
+    //      returns the occupied bandwidth in terms of sample rate fs.
     // bw = obw(pxx, f)
-    //      returns the 99% occupied bandwidth of the power spectral density (psd) estimate pxx and the corresponding frequencies f
+    //      returns the 99% occupied bandwidth of the power spectral density 
+    //      (psd) estimate pxx and the corresponding frequencies f.
     // bw = obw(sxx, f, rbw)
-    //      returns the 99% occupied bandwidth of the power spectral estimate sxx, the corresponding frequencies f. rbw is the resoltuon bandwith used to integrate the power estimates
+    //      returns the 99% occupied bandwidth of the power spectral estimate 
+    //      sxx, the corresponding frequencies f. rbw is the resolution 
+    //      bandwidth used to integrate the power estimates.
     // bw = obw(_, freqrange, p)
-    //      the calculation of the occupied bandwidth is done over the interval specified by the freqrange.
-    //      p specifies the total signal power contained in the occupied band
+    //      the calculation of the occupied bandwidth is done over the interval 
+    //      specified by the freqrange. p specifies the total signal power 
+    //      contained in the occupied band.
     // [bw, flo, fhi, power] = obw(_)
     //      the additional output arguments are the lower and upper bounds of the occupied bandwidth, and the power in that bandwidth
     // obw(_)
     //      plots the psd or the power spectrum and annotates the occupied bandwidth
+    //
     // Examples
-    // TODO:
+    // 1) Sine wave with additive guassian noise
+    //      x = sin(1:1000) + randn(1,1000);
+    //      bw = obw(x)
+
+    //
     // See also
     // bandpower | periodogram | plomb | powerbw | pwelch
+    //
     // Author
     // Ayush Baid
-    // References
-    // TODO: 
+    //
+
+    // **NOTE**: plotting currently not implemented
 
     [lhs rhs] = argn(0);
 
@@ -111,9 +130,7 @@ function [bw, flo, fhi, pwr] = obw(varargin)
     if L==1 then
         primaryInputType=1;
     elseif L==2 then
-        // input can be (x,fs) or (pxx,f)t to Kobe for being
-1: An absolute legend
-2: Awesome to work with!
+        // input can be (x,fs) or (pxx,f)
         temp2 = varargin(2);
         if ~isvector(temp2) then
             error("Wrong dimension for argument #2; should be a vector");
@@ -185,9 +202,10 @@ function [bw, flo, fhi, pwr] = obw(varargin)
         rbw = enbw(rectWindow);
 
         if isreal(x) then
+            // candidate: pspect(size(x,1),size(x,1),'re',x)
             [pxx, f] = periodogram(x, rectWindow, size(x,1), fs, 'psd');
         else
-            [pxx, f] = periodofram(x, rectWindow, size(x,1), fs, 'centered', 'psd');
+            [pxx, f] = periodogram(x, rectWindow, size(x,1), fs, 'centered', 'psd');
         end
     elseif primaryInputType==2 then
         pxx = primaryInput;
@@ -222,7 +240,7 @@ function [bw, flo, fhi, pwr] = obw(varargin)
     C = size(pxx,2);
     freqBinWidths = getFreqBinWidths(f);
     power = zeros(size(pxx,1), size(pxx,2));
-    // TODO: speedup
+    // TODO (optional): speedup
     for i=1:C
         power(:,i) = pxx(:,i) .* freqBinWidths;
     end
@@ -235,7 +253,7 @@ function [bw, flo, fhi, pwr] = obw(varargin)
     cumFreq = [f(1); 0.5*(f(1:$-1)+f(2:$)); f($)];
 
     // linearly interpolating cumPower for freqrange values
-    // TODO: check if ignoring checks is gonna hurt; coz freqrange is already inside f
+    // TODO (optional): check if ignoring checks is gonna hurt; coz freqrange is already inside f
     powerLowerFreq = zeros(1, C);  // cumulative power at lower freq range
     powerHigherFreq = zeros(1, C);  // cumulative power at higher freq range
     // todo speedup desired
@@ -255,14 +273,21 @@ function [bw, flo, fhi, pwr] = obw(varargin)
     // interpolating the frequencies at these power values
     flo = zeros(1, C);  // cumulative power at lower freq range
     fhi = zeros(1, C);  // cumulative power at higher freq range
-    // TODO: speedup desired
+    // TODO (optional): speedup desired 
     for i=1:C    // iterating on columns    
         flo(1,i) = interp1(cumPower(:,i), cumFreq, powerLo(1,i), 'linear');
         fhi(1,i) = interp1(cumPower(:,i), cumFreq, powerHi(1,i), 'linear');
     end
 
     bw = fhi - flo; // occupied bandwidth
-    pwr = p*totPower; // occupied power    
+    pwr = p*totPower; // occupied power   
+    
+    
+    if lhs==0 then
+        // plot the results
+        // TODO:
+    end  
+        
 endfunction
 
 function binWidths = getFreqBinWidths(f)
