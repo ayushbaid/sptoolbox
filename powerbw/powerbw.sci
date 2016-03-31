@@ -3,6 +3,7 @@
 // TODO: plot functionality
 function [bw, flo, fhi, power] = powerbw(varargin)
     // Computes The 3-dB (half power) bandwidth
+    
     // Calling Sequence
     // BW = powerbw(X)
     // BW = powerbw(X, FS)
@@ -12,18 +13,29 @@ function [bw, flo, fhi, power] = powerbw(varargin)
     // BW = powerbw(_, FREQRANGE, R)
     // [BW, FLO, FHI, POWER] = powerbw(_)
     // powerbw(_)
+    //
     // Parameters
-    // x: int|double - vector|matrix - input signal
-    //      in case of a matrix columns act as independent inputs
-    // fs: int|double - positive real scalar - sample rate
-    // pxx: int|double - vector|matrix - power spectral density
-    // f: int|double - vector - frequencies corresponding to pxx
-    // sxx: int|double - vector|matrix - power spectral estimate
-    // rbw: int|double - positive scalar - resolution bandwidth
-    // freqrange: int|double - 2 element vector - frequency range to be considered
-    //      if not specified, the entire bandwidth is considered
-    // r: int|double - positive scalar - power level drop
-    // description
+    // x: int|double - vector|matrix
+    //      Input Signal
+    //      In case of a matrix columns act as independent inputs
+    // fs: int|double - positive real scalar
+    //      Sampling Frequency
+    // pxx: int|double - vector|matrix
+    //      Power Spectral Density
+    // f: int|double - vector
+    //      Frequencies
+    //      Frequencies corresponing to the power spectral density values.
+    // sxx: int|double - vector|matrix
+    //      Power Spectral Estimate
+    // rbw: int|double - positive scalar
+    //      Resolution Bandwidth
+    // freqrange: int|double - 2 element vector
+    //      Frequency Range To Be Considered
+    //      If not specified, the entire bandwidth is considered.
+    // r: int|double - positive scalar
+    //      Power Level Drop
+    //
+    // Description
     // bw = powerbw(x)
     //      Returns the 3-dB bandwidth of the input signal x
     //      First, psd is computed using rectangular window. The highest value
@@ -51,14 +63,18 @@ function [bw, flo, fhi, power] = powerbw(varargin)
     //      the additional output arguments are the lower and upper bounds of the occupied bandwidth, and the power in that bandwidth
     // powerbw(_)
     //      plots the psd or the power spectrum and annotates the bandwidth
+    //
     // Examples
-    // TODO:
+    // 1) Sine wave with additive guassian noise
+    //      x = sin(1:1000) + randn(1,1000);
+    //      bw = powerbw(x)
+    // 
+    //
     // See also
     // bandpower | obw | periodogram | plomb | pwelch
+    //
     // Author
     // Ayush Baid
-    // References
-    // TODO: 
     
     [lhs rhs] = argn(0);
 
