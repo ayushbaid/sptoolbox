@@ -1,4 +1,51 @@
 function [a,g] = lpc(x,varargin)
+    // Linear prediction filter coefficients
+    //
+    //
+    // Calling Sequence
+    // [a,g] = lpc(x)
+    // [a,g] = lpc(x,p)
+    //
+    //
+    // Description
+    // [a,g] = lpc(x,p)
+    //      Determines the coefficients of a pth order forward linear predictor 
+    //      filter by minimizing the squared error. If p is unspecified, a 
+    //      default value of length(x)-1 is used.
+    //
+    // Parameters
+    // x: double
+    //      The input signal. If x is a matrix, each column in treated as an 
+    //      independent computation
+    // p: int, natural number, scalar
+    //      The order of the linear prediction filter to be inferred. Value must
+    //      be a scalar and a positive natural number. p must be less than the
+    //      the length of the signal vector
+    // a: double
+    //      The coefficients of the forward linear predictor. Coefficient for 
+    //      each signal input is returned as a row vector.
+    // g: double
+    //      Column vector of averaged square prediction error
+    //
+    //
+    // Examples
+    // 1) 
+    //      noise = randn(20000,1);
+    //      x = filter(1,[1 1/5 1/3 1/4],noise);
+    //      x = x(15904:20000);
+    //      [a,g] = lpc(x,3);
+    //
+    //
+    // References
+    // [1] Hayes, Monson H. Statistical digital signal processing and modeling. 
+    // John Wiley & Sons, 2009, pg. 220
+    //
+    // See also
+    // aryule | levinson | prony | pyulear | stmcb
+    //
+    // Authors
+    // Ayush Baid
+    //
 
     // ** Check on number of arguments **
     [numOutArgs,numInArgs] = argn(0);
@@ -7,8 +54,8 @@ function [a,g] = lpc(x,varargin)
         msg = "lpc: Wrong number of input argument; 1-2 expected";
         error(77,msg);
     end
-    if numOutArgs<1 | numOutArgs>2 then
-        msg = "lpc: Wrong number of output argument; 1-2 expected";
+    if numOutArgs~2 then
+        msg = "lpc: Wrong number of output argument; 2 expected";
         error(78,msg);
     end
     
@@ -45,7 +92,17 @@ function [a,g] = lpc(x,varargin)
         end
         
         if type(p)~=1 & type(p)~=8 then
-            msg = "lpc: Wrong type for argument #2 (p): Real scalar expected";
+            msg = "lpc: Wrong type for argument #2 (p): Natural number expected";
+            error(53,msg);
+        end
+        
+        if p~=round(p) | p<=0 then
+            msg = "lpc: Wrong type for argument #2 (p): Natural number expected";   
+            error(53,msg);
+        end
+        
+        if p>=size(x,1) then
+            msg = "lpc: Wrong value for argument #2 (p): Must be less than the length of the signal vector";   
             error(53,msg);
         end
         
