@@ -81,9 +81,8 @@ function [num,den] = latc2tf(k,varargin)
     
     L = length(varargin);
 // Parsing the 2nd argument
-    if L>1 then
-        arg2 = varargin(2);
-        
+    if L>=1 then
+        arg2 = varargin(1);
         // string check
         if type(arg2)==10 then
             if strcmpi(arg2,'FIR')==0 then
@@ -124,6 +123,9 @@ function [num,den] = latc2tf(k,varargin)
     else
         [num,den] = latc2tf_fir(k,2);
     end
+    
+    num = num';
+    den = den';
     
 endfunction
 
@@ -176,7 +178,7 @@ function [num,den] = latc2tf_fir(k,option)
         den = [flipdim(num(1:i+1,:),1); zeros(M-i-1,C)];
     end
     
-    
+    den = 1;
     if option==1 then
         // reversing the numerator
         num = conj(num($:-1:1));
@@ -252,7 +254,7 @@ function [num,den] = latc2tf_iir2(k,v)
             den = [flipdim(num(1:i+1,:),1); zeros(M-i-1,C)];
         end
         
-        den = num;
+        // den = num;
     end    
 
 endfunction
