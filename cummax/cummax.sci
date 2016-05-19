@@ -130,7 +130,7 @@ function M = cummax(varargin)
             M_(i,:,j) = cummaxVec(A_(i,:,j),isForward);
         end
     end
-    
+        
     M = matrix(M_,sizeA);
 
 endfunction
