@@ -1,7 +1,14 @@
 function [num,den] = latc2tf(k,varargin)
     // Convert lattice filter parameters to transfer function coefficients
     //
+    //
     // Calling sequence
+    // [num,den] = latc2tf(k,v)
+    // [num,den] = latc2tf(k,'iiroption')
+    // num = latc2tf(k,'firoption')
+    //
+    //
+    // Description
     // [num,den] = latc2tf(k,v)
     //      Finds the transfer function of the IIR filter from the lattice
     //      coefficients k and ladder coefficients v.
@@ -14,12 +21,14 @@ function [num,den] = latc2tf(k,varargin)
     //      filter (can be 'min, 'max', or 'FIR')
     //
     // Parameters:
-    // k - real|complex vector
+    // k: double
     //      Lattice coefficients
-    //      Lattice coefficients for FIR/IIR filter
-    // v - real|complex vector
+    //      Lattice coefficients for FIR/IIR filter. Can be real or complex. 
+    //      Experimental support for matrices, where each column in treated 
+    //      independently.
+    // v - double
     //      Ladder coefficients
-    //      Ladder coefficients for IIR filters
+    //      Ladder coefficients for IIR filters. Can be real or complex.
     // iiroption - string flag - 'allpole', or 'allpass'
     //      Specification of the type if IIR filter
     // firoption - string flag - 'min', 'max', or 'FIR' (default)
@@ -34,9 +43,9 @@ function [num,den] = latc2tf(k,varargin)
     // latcfilt | tf2latc
     //
     // References
-    // 1) J.G. Proakis, D.G. Manolakis, Digital Signal Processing,
+    // [1] J.G. Proakis, D.G. Manolakis, Digital Signal Processing,
     //    3rd ed., Prentice Hall, N.J., 1996, Chapter 7.
-    // 2) S. K. Mitra, Digital Signal Processing, A Computer
+    // [2] S. K. Mitra, Digital Signal Processing, A Computer
     //    Based Approach, McGraw-Hill, N.Y., 1998, Chapter 6.
     //
     // Authors
@@ -91,9 +100,9 @@ function [num,den] = latc2tf(k,varargin)
                 [num,den] = latc2tf_fir(k,0);
             elseif strcmpi(arg2,'max')==0 then
                 [num,den] = latc2tf_fir(k,1);
-            elseif strcmpi(arg2,'allpole') then
+            elseif strcmpi(arg2,'allpole')==0 then
                 [num,den] = latc2tf_iir2(k,1);
-            elseif strcmpi(arg2,'allpass') then
+            elseif strcmpi(arg2,'allpass')==0 then
                 [num,den] = latc2tf_iir1(k);
             else
                 msg = "latc2tf: Wrong value for argument #2 (string flag) ";
@@ -218,7 +227,7 @@ function [num,den] = latc2tf_iir1(k)
     end
     
     den = num;
-    num = conj(num($:-1:1));
+    num = conj(den($:-1:1));
 endfunction 
 
 
@@ -234,6 +243,13 @@ function [num,den] = latc2tf_iir2(k,v)
         // k is a column vector
         M = size(k,1)+1;
         C = size(k,2);
+        
+        // pad v with appropriate number of zeros
+        l_v = size(v,1);
+        diff = M - l_v;
+        if diff>0
+            v = [v; zeros(diff,size(v,2))];
+        end
         
         num = zeros(M,C);
         den = zeros(M,C);
@@ -254,7 +270,10 @@ function [num,den] = latc2tf_iir2(k,v)
             den = [flipdim(num(1:i+1,:),1); zeros(M-i-1,C)];
         end
         
-        // den = num;
+        den = num;
+        
+        [r,temp] = rlevinson(den,1);
+        num = (temp*v);
     end    
 
 endfunction

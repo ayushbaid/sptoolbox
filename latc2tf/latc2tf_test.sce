@@ -5,6 +5,7 @@ clear;
 clc;
 
 exec('latc2tf.sci',-1);
+exec('rlevinson.sci',-1);
 
 
 // Test file for latc2tf
