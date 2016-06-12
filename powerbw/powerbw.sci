@@ -226,7 +226,10 @@ function [bw, flo, fhi, power] = powerbw(varargin)
         rbw = enbw(rectWindow);
 
         if isreal(x) then
-            [pxx, f] = periodogram(x, rectWindow, size(x,1), fs, 'psd');
+            // [pxx, f] = periodogram(x, rectWindow, size(x,1), fs, 'psd');
+            pxx = (pspect(length(rectWindow)/2, length(rectWindow), 're', x));
+            
+            
         else
             [pxx, f] = periodofram(x, rectWindow, size(x,1), fs, 'centered', 'psd');
         end
