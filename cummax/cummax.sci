@@ -152,7 +152,13 @@ function out = cummaxVec(inp,isForward)
     out(startIndex) = inp(startIndex);
     if isreal(inp) then
         for i=startIndex+step:step:endIndex
-            out(i) = max(inp(i),out(i-step));
+            if isnan(out(i-step)) then
+                out(i) = inp(i);
+            elseif inp(i)>=out(i-step) then
+                out(i) = inp(i);
+            else
+                out(i) = out(i-step);
+            end
         end
     else
         magVec = abs(inp);
@@ -163,35 +169,25 @@ function out = cummaxVec(inp,isForward)
         prevMag = magVec(startIndex);
         prevPhase = phaseVec(startIndex);
         
-        for i=startIndex+step:step:endIndex
-            currentMag = magVec(i);
-            if magVec(i)>prevMag+%eps then
+        for i=(startIndex+step):step:endIndex
+            if isnan(out(i-step)) then
                 out(i) = inp(i);
                 prevMag = magVec(i);
                 prevPhase = phaseVec(i);
-            elseif magVec(i)<prevMag-%eps then
+            elseif magVec(i)>prevMag then
+                out(i) = inp(i);
+                prevMag = magVec(i);
+                prevPhase = phaseVec(i);
+            elseif magVec(i)<prevMag then
                 out(i) = out(i-step);
             else
-                if abs(phaseVec(i))<abs(prevPhase) then
-                    out(i) = inp(i);
-                    prevMag = magVec(i);
-                    prevPhase = phaseVec(i);
-                elseif abs(phaseVec(i))>abs(prevPhase) then
-                    out(i) = out(i-step);
-                elseif phaseVec(i)>prevPhase then
+                if phaseVec(i)>prevPhase then
                     out(i) = inp(i);
                     prevMag = magVec(i);
                     prevPhase = phaseVec(i);
                 else
                     out(i) = out(i-step);
                 end
-//                if phaseVec(i)>prevPhase then
-//                    out(i) = inp(i);
-//                    prevMag = magVec(i);
-//                    prevPhase = phaseVec(i);
-//                else
-//                    out(i) = out(i-step);
-//                end
             end
         end
     end
