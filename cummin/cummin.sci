@@ -149,55 +149,53 @@ function out = cumminVec(inp,isForward)
         step = -1;
     end
     
+    if isreal(inp,1e-7) then
+        inp = real(inp);
+    end
+    
+    out = zeros(size(inp,1),size(inp,2));
     out(startIndex) = inp(startIndex);
+
     if isreal(inp) then
-        for i=startIndex+step:step:endIndex
-            out(i) = min(inp(i),out(i-step));
+        for i=(startIndex+step):step:endIndex
+
+            if isnan(out(i-step)) then
+                out(i) = inp(i);
+            elseif inp(i)<=out(i-step) then
+                out(i) = inp(i);
+            else
+                out(i) = out(i-step);
+            end
         end
     else
         magVec = abs(inp);
         phaseVec = atan(imag(inp),real(inp)); 
         
-        // phase - first compare absolute value; then give priority to positive phases
+        // phase - first compare absolute value; then compare phase in [-pi,pi]
         
         prevMag = magVec(startIndex);
         prevPhase = phaseVec(startIndex);
         
-        //disp(magVec);
-        //disp(phaseVec);
         
-        for i=startIndex+step:step:endIndex
-            //disp(i);
-            currentMag = magVec(i);
-            if magVec(i)<prevMag-%eps then
-                //disp("mag1");
+        for i=(startIndex+step):step:endIndex
+            if isnan(out(i-step)) then
                 out(i) = inp(i);
                 prevMag = magVec(i);
                 prevPhase = phaseVec(i);
-            elseif magVec(i)>prevMag+%eps then
-                //disp("mag2");
+            elseif magVec(i)<prevMag then
+                out(i) = inp(i);
+                prevMag = magVec(i);
+                prevPhase = phaseVec(i);
+            elseif magVec(i)>prevMag then
                 out(i) = out(i-step);
             else
-                if abs(phaseVec(i))>abs(prevPhase) then
-                    out(i) = inp(i);
-                    prevMag = magVec(i);
-                    prevPhase = phaseVec(i);
-                elseif abs(phaseVec(i))<abs(prevPhase) then
-                    out(i) = out(i-step);
-                elseif phaseVec(i)<prevPhase then
+                if phaseVec(i)<prevPhase then
                     out(i) = inp(i);
                     prevMag = magVec(i);
                     prevPhase = phaseVec(i);
                 else
                     out(i) = out(i-step);
                 end
-//                if phaseVec(i)>prevPhase then
-//                    out(i) = inp(i);
-//                    prevMag = magVec(i);
-//                    prevPhase = phaseVec(i);
-//                else
-//                    out(i) = out(i-step);
-//                end
             end
         end
     end
