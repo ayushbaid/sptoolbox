@@ -19,8 +19,8 @@ function [a,g] = lpc(x,varargin)
     //      independent computation
     // p: int, natural number, scalar
     //      The order of the linear prediction filter to be inferred. Value must
-    //      be a scalar and a positive natural number. p must be less than the
-    //      the length of the signal vector
+    //      be a scalar and a positive natural number. p must be less than or 
+    //      equal to the length of the signal vector
     // a: double
     //      The coefficients of the forward linear predictor. Coefficient for 
     //      each signal input is returned as a row vector.
@@ -54,7 +54,7 @@ function [a,g] = lpc(x,varargin)
         msg = "lpc: Wrong number of input argument; 1-2 expected";
         error(77,msg);
     end
-    if numOutArgs~2 then
+    if numOutArgs~=2 then
         msg = "lpc: Wrong number of output argument; 2 expected";
         error(78,msg);
     end
@@ -101,8 +101,8 @@ function [a,g] = lpc(x,varargin)
             error(53,msg);
         end
         
-        if p>=size(x,1) then
-            msg = "lpc: Wrong value for argument #2 (p): Must be less than the length of the signal vector";   
+        if p>size(x,1) then
+            msg = "lpc: Wrong value for argument #2 (p): Must be less than or equal to the length of the signal vector";   
             error(53,msg);
         end
         
@@ -115,15 +115,20 @@ function [a,g] = lpc(x,varargin)
     num_signals = size(x,2);
 
     // ** Processing **
-    R = zeros(p+1,num_signals); // autocorrelation matrix
     N = size(x,1);
     
-    for i=1:p+1
-        R(i,:) = sum(x(1:N-i+1,:).*conj(x(i:N,:)),1);
-    end
-    R = R/size(x,1); // normalizing
-
-    [a,g] = ld_recursion(R);
+    // zero pad x
+    x = [x; zeros(2^nextpow2(2*N-1)-N,size(x,2))];
+    X = fft(x,-1,1);
+    R = fft(abs(X).^2,1,1);
+    R = R./N; // Biased autocorrelation estimate
+    
+    // change ieee mode to handle division by zero
+    ieee_prev = ieee();
+    ieee(2);
+    [a,g] = ld_recursion(R,p);
+    ieee(int(ieee_prev));
+    
     
     // filter coeffs should be real if input is real
     for signal_idx=1:num_signals
@@ -134,7 +139,7 @@ function [a,g] = lpc(x,varargin)
     
 endfunction
 
-function [a,e] = ld_recursion(R)
+function [a,e] = ld_recursion(R,p)
     // Solve for LP coefficients using Levinson-Derbin recursion
     //
     // Paramaters
@@ -148,24 +153,19 @@ function [a,e] = ld_recursion(R)
     //      Column vector denoting error variance for each filter computation
     
     
-    p = size(R,1)-1;
     num_filters = size(R,2);
     
     
     // Initial filter (order 0)
     a = zeros(num_filters,p+1);
     a(:,1) = 1;
-    e = abs(R(1,:)');
+    e = R(1,:).';
     
-    // disp('R=');
-    // disp(R);
     
     // Solving in a bottom-up fashion (low to high filter coeffs)
-    for m=2:p+1
-        k_m = -sum(a(:,m-1:-1:1).*R(2:m,:)',2)./e;
-        
-        // disp(k_m);
-        a(:,1:m) = a(:,1:m) + repmat(k_m,1,m).*conj(a(:,m:-1:1));
+    for m=1:p
+        k_m = -sum(a(:,m:-1:1).*R(2:m+1,:).',2)./e;
+        a(:,2:m+1) = a(:,2:m+1) + k_m(:,ones(1,m)).*conj(a(:,m:-1:1));
         
         e = (1-abs(k_m).^2).*e;
     end
