@@ -52,9 +52,14 @@ function y = fftfilt(b, x, varargin)
         error(78,msg);
     end
     
-    
+    // variables to keep track if the input vectors are column vectors
+    transform_x = %f;
     
 // ** checking the type of input arguments **
+    if isempty(b) then
+        y = zeros(size(x,1),size(x,2));
+        return;
+    end
     
     // b should contain numeric entries
     if ~(type(b)==1 | type(b)==8 | type(b)==17) then
@@ -76,7 +81,8 @@ function y = fftfilt(b, x, varargin)
         inpType = 1;
         // if x is a vector; it should be a column vector
         if size(x,1)==1 then
-            x = x';
+            x = x(:);
+            transform_x = %t;
         end
         
         // covert b to column vector
@@ -87,7 +93,10 @@ function y = fftfilt(b, x, varargin)
         
         if size(x,1)==1 | size(x,2)==1 then
             inpType = 2;
-            x = x(:);
+            if size(x,1)==1 then
+                x = x(:);
+                transform_x = %t;
+            end
         else 
             // check compatibility
             if size(b,2)~=size(x,2) then
@@ -108,6 +117,7 @@ function y = fftfilt(b, x, varargin)
         if (nb>=nx | nb>2^20) then 
             // take a single fft
             nfft = 2^nextpow2(nb+nx-1);
+            L = nx;
         else
             // estimated flops for the fft operation (2.5nlog n for n in powers of 2 till 20)
             fftflops = [5, 20, 60, 160, 400, 960, 2240, 5120, 11520, 25600, 56320, 122880, 266240, 573440, 1228800, 2621440, 5570560, 11796480, 24903680, 52428800];
@@ -123,11 +133,11 @@ function y = fftfilt(b, x, varargin)
             nfft = n(ind);
             L = L(ind);
 
-        end,
+        end
     else  // nfft is given
         if nfft < nb then
             nfft = nb;
-        end,
+        end
         nfft = 2.^(ceil(log(nfft)/log(2))); // forcing nfft to a power of 2 for speed
         L = nfft - nb + 1;
     end
@@ -185,9 +195,11 @@ function y = fftfilt(b, x, varargin)
         y = real(y);
     end
 
-    if temp==1 & inpType==1 then
-        y = y(:).';    // turn column back into a row
+
+    if inpType==1 & transform_x then
+        y = y';
     end
+    
 
 endfunction
 
