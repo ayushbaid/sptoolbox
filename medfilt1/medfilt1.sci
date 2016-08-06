@@ -273,6 +273,7 @@ function med = medfilt_colvector(x, n, zeropadflag, nanflag)
                 nanpresent = or(isnan(block), 1);
                 if nanpresent then
                      med(i-ceil(n/2)+1) = %nan;
+                end
             else
                 // we have to neglect nans
                 sorted_block = gsort(block, 'g', 'i');
@@ -305,6 +306,7 @@ function med = medfilt_colvector(x, n, zeropadflag, nanflag)
                 nanpresent = or(isnan(block), 1);
                 if nanpresent then
                      med($-ceil(n/2)+i) = %nan;
+                end
             else
                 // we have to neglect nans
                 sorted_block = gsort(block, 'g', 'i');
