@@ -124,11 +124,39 @@ function L = filternorm(b,a,varargin)
         else
             // Checking for stability, as we wont be able to calc impulse response
             // within a given tolerance.
-         
-    
-endfunction
-    
+            
+            // TODO: complete after impzlength and impz
+            pole_mag = abs(roots(a));
+            
+            // stability check
+            max_dist = max(pole_mag);
+            if max_dist>=1 then
+                // poles lie on the unit circle or outside it. We do not have a 
+                // decaying impulse response and hence truncation is not advisable
+                msg = "filternorm: Non convergent impulse response. All poles should lie inside the unit circle";
+                error(msg);
+            end
+            
+            // ****
+            // Theory: (assuming stable filter)
+            // Each pole will contribute a decaying exponential. The pole with
+            // the highest magnitude will decay the slowest (i.e. will be the most
+            // dominant). Therefore, we will work with pole(s) having the largest
+            // magnitude to obtain a bound on the L2 norm of the tail.
+            // ****
+            
+            // get the multiplicity of the largest pole
+            mult = sum(pole_mag>(max_dist-1e-5) & pole_mag<(max_dist+1e-5));
 
+            // Using integration of a^(-x) to get a bound            
+            N = mult*log(tol)/log(max_dist);
+    
+            // get filter coeffs using impzlength from octave
+            h = impz(b,a,N);
+            s = norm(h,2);
+        end
+    end
+endfunction
 function h = computeFreqResponse(b,a,n)
     // Computes the frequency response of a filter specified by b,a. n specifies
     // the discretization of the frequency space

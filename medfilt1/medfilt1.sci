@@ -81,8 +81,9 @@ function y = medfilt1(x, varargin)
     // *************************************************************************
     
     // * Parsing x *
-    if type(x)~=1 & type(x)~=8 then
-        msg = "lpc: Wrong type for argument #1 (x): Int/double expected"
+    temp = x(:);
+    if type(temp)~=1 & type(temp)~=8 then
+        msg = "medfilt1: Wrong type for argument #1 (x): Int/double expected"
         error(53, msg);
     end
     
@@ -97,21 +98,21 @@ function y = medfilt1(x, varargin)
         end
     end
     
-    nanflag = 0; // 0->includenan (default); 1->omitnan
-    padding = 0; // 0->zeropad (default); 1->truncate
+    nanflag = %f; // 0->includenan (default); 1->omitnan
+    padflag = %t; // 1->zeropad (default); 0->truncate
     if ~isempty(stringIndices) then
         // checking for 'omitnan'
         if or(strcmpi(varargin(stringIndices), 'omitnan')) then
-            nanflag = 1;
+            nanflag = %t;
         end
         
         // checking for 'truncate'
         if or(strcmpi(varargin(stringIndices), 'truncate')) then
-            padding = 1;
+            padflag = %f;
         end
+        varargin(stringIndices) = [];
     end
     
-    varargin(stringIndices) = [];
     
     // setting default value for n and dim
     n = 3;
@@ -186,9 +187,7 @@ function y = medfilt1(x, varargin)
     // *************************************************************************
     // Processing for median filtering column by column
     // *************************************************************************
-    
-    
-    
+
     inp_size = size(x);
 
     
@@ -196,14 +195,20 @@ function y = medfilt1(x, varargin)
     perm_vec = [2:dim, 1, dim+1:length(inp_size)];
     reverse_perm_vec = [dim, 1:dim-1, dim+1:length(inp_size)];
     x = permute(x, perm_vec);
+
+    size_vec = size(x);
     
     y = x;  // just initialization
 
-    for i=1:prod(inp_size(2:$))
-        y(:,i) = medfilt_colvector(x(:,i), n);
+    for i=1:prod(size_vec(2:$))
+        temp = medfilt_colvector(x(:,i), n, padflag, nanflag);
+        y(:,i) = temp;
     end
     
-    y = permute(y, reverse_perm_vec);   
+    
+    
+    y = permute(y, reverse_perm_vec);
+    
     
 endfunction
 
@@ -212,16 +217,18 @@ function med = medfilt_colvector(x, n, zeropadflag, nanflag)
     // zeropadflag -> zero pad instead of truncation
     // nanflag -> discard all blocks containing nan, else do not consider nan values
     
+    med = zeros(size(x,1),1);
+    disp('here1');
+    
     
     // ** zero pad the signal **
     pad_length = floor(n/2);  // padding on a size
     x = [zeros(pad_length,1); x; zeros(pad_length,1)];
     
-
     nx = length(x);
 
     // Arrange data in blocks
-    top_row = 1:(nx-n+1);
+    top_row = 1:(nx-n);
     
     idx = zeros(n,length(top_row));
     
@@ -233,37 +240,41 @@ function med = medfilt_colvector(x, n, zeropadflag, nanflag)
     
     
     if nanflag then
+        disp('here2');
         med = median(blocks, 1)';
    
         // set result of all the blocks containing nan to nan
         nanpresent = or(isnan(blocks), 1);
         med(nanpresent) = %nan;
     else
+        disp('here3');
         // we have to neglect nans
-        sorted_blocks = gsort(blocks, 'g', 'i');
+        sorted_blocks = gsort(blocks, 'r', 'i');
         
         // get the count of non-nan elements
         num_elems = n - sum(isnan(sorted_blocks), 1);
         
         // find the median
-        idx1 = ceil(num_elems/2);
-        idx2 = ceil(num_elems/2+0.25);
+        offset = (0:size(blocks,2)-1)*size(blocks,1);
+        idx1 = offset+ceil(num_elems/2);
+        idx2 = offset+ceil((num_elems/2)+0.25);
+
         
         // temporarily setting idx1 to 1 so as to not give errors in median calc.
         // Will later replace values at such indices with Nan
         idx1(idx1==0)=1;
-        med = (sorted_blocks(idx1, :) + sorted_blocks(idx2, :))./2;
+        med = (sorted_blocks(idx1) + sorted_blocks(idx2))./2;
         
         med(idx1==0) = %nan;
     end
-    
+
     if ~zeropadflag then
         // ** recalculate boundary blocks with truncation truncate at the boundaries **
         
         // divide the input signal into 3 parts; 1st and last part have truncation
         for i=ceil(n/2):n
             // ** first part **
-            block = x(1:i)
+            block = x(1:i);
             
             // * median calc for a block *
             if nanflag then
@@ -276,7 +287,7 @@ function med = medfilt_colvector(x, n, zeropadflag, nanflag)
                 end
             else
                 // we have to neglect nans
-                sorted_block = gsort(block, 'g', 'i');
+                sorted_block = gsort(block, 'r', 'i');
         
                 // get the count of non-nan elements
                 num_elems = length(block) - sum(isnan(sorted_block), 1);
@@ -284,13 +295,14 @@ function med = medfilt_colvector(x, n, zeropadflag, nanflag)
                 // find the median
                 idx1 = ceil(num_elems/2);
                 idx2 = ceil(num_elems/2+0.25);
+                
             
                 // temporarily setting idx1 to 1 so as to not give errors in median calc.
                 // Will later replace values at such indices with Nan
                 if idx1==0 then
                     med(i-ceil(n/2)+1) = %nan;
                 else
-                    med(i-ceil(n/2)+1) = (sorted_blocks(idx1, :) + sorted_blocks(idx2, :))./2;
+                    med(i-ceil(n/2)+1) = (sorted_block(idx1, :)+sorted_block(idx2, :))./2;
                 end
             end 
             
@@ -300,16 +312,21 @@ function med = medfilt_colvector(x, n, zeropadflag, nanflag)
             
             // * median calc for a block *
             if nanflag then
-                med($-ceil(n/2)+i)) = median(block, 1);
+                med($+ceil(n/2)-i) = median(block, 1);
    
                 // set result of all the blocks containing nan to nan
                 nanpresent = or(isnan(block), 1);
                 if nanpresent then
+<<<<<<< 259c9f3fbbf62c2af1eb476dc53b44898ded1e3f
                      med($-ceil(n/2)+i) = %nan;
                 end
+=======
+                     med($+ceil(n/2)-i) = %nan;
+                end 
+>>>>>>> medfilt1: bug fix and added new tests
             else
                 // we have to neglect nans
-                sorted_block = gsort(block, 'g', 'i');
+                sorted_block = gsort(block, 'r', 'i');
         
                 // get the count of non-nan elements
                 num_elems = length(block) - sum(isnan(sorted_block), 1);
@@ -321,9 +338,9 @@ function med = medfilt_colvector(x, n, zeropadflag, nanflag)
                 // temporarily setting idx1 to 1 so as to not give errors in median calc.
                 // Will later replace values at such indices with Nan
                 if idx1==0 then
-                    med($-ceil(n/2)+i) = %nan;
+                    med($+ceil(n/2)-i) = %nan;
                 else
-                    med($-ceil(n/2)+i) = (sorted_blocks(idx1, :) + sorted_blocks(idx2, :))./2;
+                    med($+ceil(n/2)-i) = (sorted_block(idx1) + sorted_block(idx2))./2;
                 end
             end
         end
