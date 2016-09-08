@@ -41,6 +41,23 @@ end
           if a(1)~=1 then
                     warning('First coefficient of the prediction polynomial was not unity.')
           end
+          
+          if a(1)==0 then
+              R=repmat(%nan,[length(a),1])
+              xx=length(a);
+              l=tril(zeros(xx,xx),-1);
+              d=diag(ones(1,xx));
+              u=triu(repmat(%nan,[xx,xx]),1);
+              U=l+d+u;
+              U(xx,xx)=%nan;
+              U(1:xx-1,xx)=(repmat(%inf,[1,xx-1]))'
+              kr=repmat(%nan,[xx-2,1]);
+              kr=[kr',%inf]
+              kr=kr'
+          else
+              
+              
+          
           a=a/a(1);
           
           n=length(a);
@@ -63,7 +80,7 @@ end
       for i=n-1:-1:1 // start levinson down
           
          ee=a($)
-               
+           
           a = (a-Kr(i+1)*flipdim(a,2,1))/(1-Kr(i+1)^2);
                                                
            a=a(1:$-1)
@@ -83,7 +100,7 @@ end
             e=e';
  
  if  abs(a(2))==1 then
-           e1=%inf
+           e1=%nan
  else
        e1=e(1)/(1-abs(a(2)^2));     
  end
@@ -104,6 +121,7 @@ end
  end
 
  R=[R1; R];    
+  end
      
                 
 endfunction

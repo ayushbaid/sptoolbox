@@ -21,12 +21,10 @@ function [num,den] = latc2tf(k,varargin)
     //      filter (can be 'min, 'max', or 'FIR')
     //
     // Parameters:
-    // k: double
+    // k - double - vector
     //      Lattice coefficients
     //      Lattice coefficients for FIR/IIR filter. Can be real or complex. 
-    //      Experimental support for matrices, where each column in treated 
-    //      independently.
-    // v - double
+    // v - double - vector
     //      Ladder coefficients
     //      Ladder coefficients for IIR filters. Can be real or complex.
     // iiroption - string flag - 'allpole', or 'allpass'
@@ -149,49 +147,21 @@ function [num,den] = latc2tf_fir(k,option)
         den = 1;
         return
     end
-    
-    
-    // k is a column vector
-    M = size(k,1)+1;
-    C = size(k,2);
-    
-    // the A* and B* matrices contains powers of inv(z) in increasing order
-    
-   
-    if option==2 then
-        if max(abs(k))>1 then
-            msg = "latc2tf: Invalid value for argument #1(k); all values " + ...
-                "have absolute value not greater than 1";
-            error(42,msg);
-        end
-    end
-        
-    temp = zeros(M,C);
-    
-    num = zeros(M,C);
-    den = zeros(M,C);
-    num_prev = zeros(M,C);
-    
-    zeroRowVec = zeros(1,C);
-    
-    
-    // Initializing A0 and B0
-    num(1,:) = ones(1,C);
-    den(1,:) = ones(1,C);
-    
-    for i=1:M-1
-        // A_{m}(z) = A_{m-1}(z) + km(z^-1)B_{m-1}(z)
-        num = num + repmat(k(i,:),M,1).*[zeroRowVec; den(1:$-1,:)];
-        
-        // B_{m}(z) = (z^{-m}) A_{m}(inv(z))
-        den = [flipdim(num(1:i+1,:),1); zeros(M-i-1,C)];
-    end
-    
+
     den = 1;
-    if option==1 then
-        // reversing the numerator
-        num = conj(num($:-1:1));
-    end
+    
+    p = length(k);
+    num = 1;
+
+    for j=2:p+1
+    	num = [num; 0] + k(j-1)*[0; conj(num($:-1:1,:))];
+	end
+
+	if option==1 then
+		num = conj(num($:-1:1));
+	end
+
+    
 endfunction
 
 function [num,den] = latc2tf_iir1(k)
@@ -202,77 +172,53 @@ function [num,den] = latc2tf_iir1(k)
         den = 1;
         return
     end
+
+    p = length(k);
+    den = 1;
+
+    for j=2:p+1
+    	den = [den; 0] + k(j-1)*[0; conj(den($:-1:1,:))];
+	end
+
+	num = conj(den($:-1:1));
     
-    // k is a column vector
-    M = size(k,1)+1;
-    C = size(k,2);
-    
-    num = zeros(M,C);
-    den = zeros(M,C);
-    num_prev = zeros(M,C);
-    
-    zeroRowVec = zeros(1,C);
-    
-    
-    // Initializing A0 and B0
-    num(1,:) = ones(1,C);
-    den(1,:) = ones(1,C);
-    
-    for i=1:M-1
-        // A_{m}(z) = A_{m-1}(z) + km(z^-1)B_{m-1}(z)
-        num = num + repmat(k(i,:),M,1).*[zeroRowVec; den(1:$-1,:)];
-        
-        // B_{m}(z) = (z^{-m}) A_{m}(inv(z))
-        den = [flipdim(num(1:i+1,:),1); zeros(M-i-1,C)];
-    end
-    
-    den = num;
-    num = conj(den($:-1:1));
+   
 endfunction 
 
 
 function [num,den] = latc2tf_iir2(k,v)
     // for allpole and general IIR fitlers
-    if isempty(k) & isempty(v),
+    if isempty(k) & isempty(v) then
         num = [];
         den = [];
-    elseif isempty(k) & length(v)==1,
+    elseif isempty(k) & length(v)==1 then
         num = v;
         den = 1;
     else
         // k is a column vector
         M = size(k,1)+1;
-        C = size(k,2);
         
         // pad v with appropriate number of zeros
         l_v = size(v,1);
         diff = M - l_v;
-        if diff>0
-            v = [v; zeros(diff,size(v,2))];
-        end
+        if diff>0 then
+            v = [v; zeros(diff,1)];
+        elseif diff<0 then
+        	k = [k; zeros(-diff,1)];
+    	end
+
+
+        p = length(k);
+    	den = 1;
+
+    	for j=2:p+1
+	    	den = [den; 0] + k(j-1)*[0; conj(den($:-1:1,:))];
+		end
         
-        num = zeros(M,C);
-        den = zeros(M,C);
-        num_prev = zeros(M,C);
-        
-        zeroRowVec = zeros(1,C);
-        
-        
-        // Initializing A0 and B0
-        num(1,:) = ones(1,C);
-        den(1,:) = ones(1,C);
-        
-        for i=1:M-1
-            // A_{m}(z) = A_{m-1}(z) + km(z^-1)B_{m-1}(z)
-            num = num + repmat(k(i,:),M,1).*[zeroRowVec; den(1:$-1,:)];
-            
-            // B_{m}(z) = (z^{-m}) A_{m}(inv(z))
-            den = [flipdim(num(1:i+1,:),1); zeros(M-i-1,C)];
-        end
-        
-        den = num;
-        
+        exec('rlevinson.sci',-1);
+
         [r,temp] = rlevinson(den,1);
+
         num = (temp*v);
     end    
 
