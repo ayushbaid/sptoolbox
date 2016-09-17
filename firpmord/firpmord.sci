@@ -104,7 +104,7 @@ function [n, fo, ao, w] = firpmord(f, a, dev, varargin)
         error(53,msg);
     end
     
-    if ~(and(f>0) & and(f<fs/2)) then
+    if ~(and(f>=0) & and(f<=fs/2)) then
         msg = "firpmord: Wrong value for argument #1 (f): Values must be between 0 and fs/2";
         error(116,msg);
     end
