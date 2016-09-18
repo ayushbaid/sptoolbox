@@ -3,8 +3,6 @@ function [outputData,msg] = musicBase(inputData)
     // Implements the core of the MUSIC algorithm
     // Used by pmusic and rootmusic algorithm
     
-    // TODO: complete docs
-    
     msg = "";
     outputData = struct();
     
@@ -12,12 +10,6 @@ function [outputData,msg] = musicBase(inputData)
             inputData.isCorrFlag, inputData.windowLength, ...
             inputData.noverlap, inputData.windowVector, ...
             inputData.isWindowSpecified);
-    
-    
-    // disp("eigenvects in musicBase");
-    // disp(eigenvects);        
-    // disp("eigenvals in musicBase");
-    // disp(eigenvals);
             
     if length(msg)~=0 then
         return
@@ -40,7 +32,8 @@ function [outputData,msg] = musicBase(inputData)
 endfunction
 
 
-function [eigenvects,eigenvals,msg] = computeEig(x,isCorrFlag, windowLength, noverlap, window,isWindowSpecified)
+function [eigenvects,eigenvals,msg] = computeEig(x,isCorrFlag, windowLength, ...
+			noverlap, window,isWindowSpecified)
     // Computes the eigenvalues for the correlation matrix
     // If x is a correlation matrix, which is specified using the isCorrFlag, 
     // spec() is used for eigenvalue decomposition.
@@ -55,18 +48,21 @@ function [eigenvects,eigenvals,msg] = computeEig(x,isCorrFlag, windowLength, nov
     xIsMatrix = ~or(size(x)==1);
     
     if xIsMatrix & isCorrFlag then
-        // TODO: check the order of eigenvalues
-        [eigenvects,d] = spec((R+R')/2); // ensuring hermitian property
+        [eigenvects,d] = spec((x+x')/2); // ensuring hermitian property
         eigenvals = diag(d);
         // sorting in decreasing order
         [eigenvals,order] = gsort(eigenvals);
-        // TODO: nonnegative eigenvals check
         
         // rearragning in decreasing order of eigenvalues
         eigenvects = eigenvects(:,order);
     else
         if xIsMatrix then
-            // TODO: check for dimenion constraints
+            [r, c] = size(x);
+            
+            if (c > r) then
+                msg = "Signal has more columns than rows";
+                return
+            end
         else
             // x is vector
             Lx = length(x);
@@ -78,7 +74,6 @@ function [eigenvects,eigenvals,msg] = computeEig(x,isCorrFlag, windowLength, nov
             
             if ~isWindowSpecified then
                 // disp("window not specified");
-                // TODO: understand
                 [x,msg] = createBufferMatrix(x,Lx-windowLength+1,Lx-windowLength);
                 if length(msg)~=0 then
                     return
@@ -109,7 +104,15 @@ function [eigenvects,eigenvals,msg] = computeEig(x,isCorrFlag, windowLength, nov
         
         // disp("X = (before SVD)");
         // disp(x);
-        [temp,S,eigenvects] = svd(x,0);
+        
+        [m,n] = size(x);
+        
+        if m>n then
+            [temp,S,eigenvects] = svd(x,'e');
+        else
+            [temp,S,eigenvects] = svd(x);
+        end
+        
         // squaering the eigenvalues
         eigenvals = diag(S).^2;
         

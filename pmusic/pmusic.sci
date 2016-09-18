@@ -1,7 +1,8 @@
 // Date of creation: 18 Dec, 2015
-function [S,f,v,e] = pmusic(varargin)
+function varargout = pmusic(varargin)
     // Psuedospectrum using MUSIC algorithm
     //
+    // Note: does not implement the plotting functionality as in matlab
     // Calling Sequence
     // [S,w] = pmusic(x,p)
     // [S,w] = pmusic(x,p,w)
@@ -12,7 +13,6 @@ function [S,f,v,e] = pmusic(varargin)
     // [S,f] = pmusic(x,p,nfft,fs,nwin,noverlap)
     // [...] = pmusic(...,freqrange)
     // [...,v,e] = pmusic(...)
-    // pmusic(...)
     //
     // Parameters:
     // x - int|double - vector|matrix
@@ -75,25 +75,29 @@ function [S,f,v,e] = pmusic(varargin)
     exec('musicBase.sci',-1);
     
     [numOutArgs,numInArgs] = argn(0);
-    disp(numOutArgs);
     
     // check number of output arguments
-    if numOutArgs~=0 & numOutArgs~=2 & numOutArgs~=4 then
-        msg = "pmusic: Wrong number of output argument; 0,2, or 4 expected";
+    if numOutArgs~=2 & numOutArgs~=4 then
+        msg = "pmusic: Wrong number of output argument; 2 or 4 expected";
         error(78,msg);
     end
 
     // ("**start**");
-    [data, msg] = subspaceMethodsInputParser(varargin);
-    // disp("**input parsed**");
-
+    [data, msg, err_num] = subspaceMethodsInputParser(varargin);
+    
     if length(msg)==0 then
         // no error occured
     else
-        error(msg);
+        error(err_num, "pmusic: " + msg);
     end
+    
+    //disp(data);
 
     [musicData,msg] = musicBase(data);
+    
+    //disp(musicData);
+    //disp(musicData.noiseEigenvects);
+    //disp(musicData.signalEigenvects);    
 
     if length(msg)~=0 then
         error(msg);
@@ -106,6 +110,8 @@ function [S,f,v,e] = pmusic(varargin)
         
     v = musicData.noiseEigenvects;
     e = musicData.eigenvals;
+    
+    varargout = list(S,f,v,e);
     
     // plot if requested
     if numOutArgs==0 then
@@ -132,6 +138,8 @@ function [pspec,w] = pseudospectrum(noiseEigenvects, eigenvals, freqvector, ...
     weights = ones(1,size(noiseEigenvects,2));
 
     denominator = 0;
+    
+    isFreqGiven = %F;
 
     for i=1:size(noiseEigenvects,2);
         // disp("looping in pseudospectrum");
@@ -139,9 +147,9 @@ function [pspec,w] = pseudospectrum(noiseEigenvects, eigenvals, freqvector, ...
             [h,w] = computeFreqResponseByFFT(noiseEigenvects(:,i),nfft,fs,...
                             isFsSpecified);
         else
-            h = computeFreqResponseByPolyEval(noiseEigenvects(:,i),...
+            [h,w] = computeFreqResponseByPolyEval(noiseEigenvects(:,i),...
                             freqvector,fs,isFsSpecified);
-            w = freqvector;
+            isFreqGiven = %T;
         end
         denominator = denominator + (abs(h).^2)./weights(i);
         // disp(h(1:10));
@@ -152,32 +160,36 @@ function [pspec,w] = pseudospectrum(noiseEigenvects, eigenvals, freqvector, ...
     pspec = 1.0 ./ denominator;
     // converting to column vector
     pspec = pspec(:);
-    // correcting the range of pspec according to the user specification
-    if strcmpi(freqrange, 'onesided')==0 then
-        if modulo(nfft,2) then
-            // nfft is odd
-            range = 1:(1+nfft)/2;
-        else
-            range = 1:nfft/2+1;
-        end
-        pspec = pspec(range);
-        w = w(range);
-    elseif strcmpi(freqrange,'centered')==0 then
-        // convert two sided spectrum to centered
-        rem = modulo(nfft,2);
-        
-        if rem then
-            idx = [(nfft+1)/2+1:nfft 1:(nfft+1)/2];
-        else
-            idx = [nfft/2+2:nfft 1:nfft/2+1];
-        end
-        pspec = pspec(idx);
-        w = w(range);
-        
-        if rem then
-            w(1:(nfft-1)/2) = w(1:(nfft-1)/2) - fs;
-        else
-            w(1:nfft/2-1) = w(1:nfft/2-1) - fs;
+    
+    if ~isFreqGiven then
+        // correcting the range of pspec according to the user specification
+        if strcmpi(freqrange, 'onesided')==0 then
+            if modulo(nfft,2) then
+                // nfft is odd
+                range = 1:(1+nfft)/2;
+            else
+                range = 1:((nfft/2)+1);
+            end
+            pspec = pspec(range);
+            w = w(range);
+            
+        elseif strcmpi(freqrange,'centered')==0 then
+            // convert two sided spectrum to centered
+            rem = modulo(nfft,2);
+            
+            if rem then
+                idx = [(nfft+1)/2+1:nfft 1:(nfft+1)/2];
+            else
+                idx = [nfft/2+2:nfft 1:nfft/2+1];
+            end
+            pspec = pspec(idx);
+            w = w(range);
+            
+            if rem then
+                w(1:(nfft-1)/2) = w(1:(nfft-1)/2) - fs;
+            else
+                w(1:nfft/2-1) = w(1:nfft/2-1) - fs;
+            end
         end
     end
 
@@ -213,27 +225,28 @@ function [h,w] = computeFreqResponseByFFT(b,n,fs,isFsSpecified)
     
 endfunction
 
-function h = computeFreqResponseByPolyEval(b,f,fs,isFsSpecified)
+function [h,w] = computeFreqResponseByPolyEval(b,f,fs,isFsSpecified)
     // returns the frequency response (h) for a digital filter with numerator b.
     // The evaluation of the frequency response is done at frequency values f
     
+    // disp(f);
+    // disp(isFsSpecified);
+    
     f = f(:);
     b = b(:);
-    if isFsSpecified then
-        // normalizing the f vector
-        w = f*2*%pi/fs;
-    else
-        w = f;
-    end
     
     n = length(b);
     powerMatrix = zeros(length(f),n);
     powerMatrix(:,1) = 1;
     for i=2:n
-        powerMatrix(:,i) = exp(w*(-i+1)*%i);
+        powerMatrix(:,i) = exp(f*(-i+1)*%i);
     end
     
     h = powerMatrix*b;
+    
+    if isFsSpecified then
+        w = f * fs/(2*%pi);
+    end
      
 endfunction
 
