@@ -12,7 +12,6 @@ function [S,f,v,e] = peig(varargin)
     // [S,f] = peig(x,p,nfft,fs,nwin,noverlap)
     // [...] = peig(...,freqrange)
     // [...,v,e] = peig(...)
-    // peig(...)
     //
     // Parameters:
     // x - int|double - vector|matrix
@@ -74,20 +73,18 @@ function [S,f,v,e] = peig(varargin)
     exec('subspaceMethodsInputParser.sci',-1);
     exec('musicBase.sci',-1);
 
-    // ("**start**");
-    [data, msg] = subspaceMethodsInputParser(varargin);
-    // disp("**input parsed**");
-
+    [data, msg, err_num] = subspaceMethodsInputParser(varargin);
+    
     if length(msg)==0 then
         // no error occured
     else
-        error(msg);
+        error(err_num, "peig: " + msg);
     end
 
     [musicData,msg] = musicBase(data);
 
     if length(msg)~=0 then
-        error(msg);
+        error("peig: " + msg);
     end
 
 
@@ -107,9 +104,12 @@ function [pspec,w] = pseudospectrum(noiseEigenvects, eigenvals, freqvector, ...
     
     // NOTE: the only difference from the pmusic code
     // Using the noise subspace eigenvalues as weights
-    weights = eigenvals($-size(noiseEigenvects,2)+1:$); 
+    weights = eigenvals(($-size(noiseEigenvects,2)+1):$); 
 
     denominator = 0;
+    
+    isFreqGiven = %F;
+    
 
     for i=1:size(noiseEigenvects,2);
         // disp("looping in pseudospectrum");
@@ -117,45 +117,49 @@ function [pspec,w] = pseudospectrum(noiseEigenvects, eigenvals, freqvector, ...
             [h,w] = computeFreqResponseByFFT(noiseEigenvects(:,i),nfft,fs,...
                             isFsSpecified);
         else
-            h = computeFreqResponseByPolyEval(noiseEigenvects(:,i),...
+            [h,w] = computeFreqResponseByPolyEval(noiseEigenvects(:,i),...
                             freqvector,fs,isFsSpecified);
-            w = freqvector;
+            isFreqGiven = %T;
         end
         denominator = denominator + (abs(h).^2)./weights(i);
-        // disp(h(1:10));
     end
-    
-    // disp(denominator(1:5));
+
     // computing pseudospectrum pspec
     pspec = 1.0 ./ denominator;
     // converting to column vector
+
+
     pspec = pspec(:);
-    // correcting the range of pspec according to the user specification
-    if strcmpi(freqrange, 'onesided')==0 then
-        if modulo(nfft,2) then
-            // nfft is odd
-            range = 1:(1+nfft)/2;
-        else
-            range = 1:nfft/2+1;
-        end
-        pspec = pspec(range);
-        w = w(range);
-    elseif strcmpi(freqrange,'centered')==0 then
-        // convert two sided spectrum to centered
-        rem = modulo(nfft,2);
-        
-        if rem then
-            idx = [(nfft+1)/2+1:nfft 1:(nfft+1)/2];
-        else
-            idx = [nfft/2+2:nfft 1:nfft/2+1];
-        end
-        pspec = pspec(idx);
-        w = w(range);
-        
-        if rem then
-            w(1:(nfft-1)/2) = w(1:(nfft-1)/2) - fs;
-        else
-            w(1:nfft/2-1) = w(1:nfft/2-1) - fs;
+    
+    if ~isFreqGiven then
+        // correcting the range of pspec according to the user specification
+        if strcmpi(freqrange, 'onesided')==0 then
+            if modulo(nfft,2) then
+                // nfft is odd
+                range = 1:(1+nfft)/2;
+            else
+                range = 1:((nfft/2)+1);
+            end
+            pspec = pspec(range);
+            w = w(range);
+            
+        elseif strcmpi(freqrange,'centered')==0 then
+            // convert two sided spectrum to centered
+            rem = modulo(nfft,2);
+            
+            if rem then
+                idx = [((nfft+1)/2+1):nfft 1:(nfft+1)/2];
+            else
+                idx = [(nfft/2+2):nfft 1:(nfft/2+1)];
+            end
+            pspec = pspec(idx);
+            w = w(idx);
+            
+            if rem then
+                w(1:(nfft-1)/2) = - w(nfft:-1:((nfft+1)/2+1));
+            else
+                w(1:(nfft/2-1)) = - w(nfft:-1:(nfft/2+2));
+            end
         end
     end
 
@@ -170,7 +174,7 @@ function [h,w] = computeFreqResponseByFFT(b,n,fs,isFsSpecified)
     if isempty(fs) then
         fs=1;
     end
-    w = linspace(0,2*%pi/fs,n+1)';
+    w = linspace(0,2*%pi,n+1)';
     w($) = [];
     w(1) = 0;   // forcing the first frequency to be 0
     
@@ -191,26 +195,27 @@ function [h,w] = computeFreqResponseByFFT(b,n,fs,isFsSpecified)
     
 endfunction
 
-function h = computeFreqResponseByPolyEval(b,f,fs,isFsSpecified)
+function [h,w] = computeFreqResponseByPolyEval(b,f,fs,isFsSpecified)
     // returns the frequency response (h) for a digital filter with numerator b.
     // The evaluation of the frequency response is done at frequency values f
     
+    // disp(f);
+    // disp(isFsSpecified);
+    
     f = f(:);
     b = b(:);
-    if isFsSpecified then
-        // normalizing the f vector
-        w = f*2*%pi/fs;
-    else
-        w = f;
-    end
     
     n = length(b);
     powerMatrix = zeros(length(f),n);
     powerMatrix(:,1) = 1;
     for i=2:n
-        powerMatrix(:,i) = exp(w*(-i+1)*%i);
+        powerMatrix(:,i) = exp(f*(-i+1)*%i);
     end
     
     h = powerMatrix*b;
+    
+    if isFsSpecified then
+        w = f * fs/(2*%pi);
+    end
      
 endfunction
