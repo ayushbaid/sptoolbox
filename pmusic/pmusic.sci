@@ -178,17 +178,17 @@ function [pspec,w] = pseudospectrum(noiseEigenvects, eigenvals, freqvector, ...
             rem = modulo(nfft,2);
             
             if rem then
-                idx = [(nfft+1)/2+1:nfft 1:(nfft+1)/2];
+                idx = [((nfft+1)/2+1):nfft 1:(nfft+1)/2];
             else
-                idx = [nfft/2+2:nfft 1:nfft/2+1];
+                idx = [(nfft/2+2):nfft 1:(nfft/2+1)];
             end
             pspec = pspec(idx);
-            w = w(range);
+            w = w(idx);
             
             if rem then
-                w(1:(nfft-1)/2) = w(1:(nfft-1)/2) - fs;
+                w(1:(nfft-1)/2) = - w(nfft:-1:((nfft+1)/2+1));
             else
-                w(1:nfft/2-1) = w(1:nfft/2-1) - fs;
+                w(1:(nfft/2-1)) = - w(nfft:-1:(nfft/2+2));
             end
         end
     end

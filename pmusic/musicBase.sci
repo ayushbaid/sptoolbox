@@ -20,6 +20,7 @@ function [outputData,msg] = musicBase(inputData)
     if length(msg)~=0 then
         return
     end
+
     
     // Separating the eigenvects into signal and noise subspace
     signalEigenvects = eigenvects(:,1:pEffective);
