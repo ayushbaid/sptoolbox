@@ -148,7 +148,7 @@ function [xMat,msg] = createBufferMatrix(x,windowLength,noverlap)
     
     if size(x,2)~=1 then
         // convert to column vector
-        x = x';
+        x = x(:);
     end
     
     L = length(x);
