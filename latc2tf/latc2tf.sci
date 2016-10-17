@@ -20,8 +20,8 @@ function [num,den] = latc2tf(k,varargin)
     //      coefficients k. The firoption flag specifies the type of the FIR
     //      filter (can be 'min, 'max', or 'FIR')
     //
-    // Parameters:
-    // k - double - vector
+    // Parameters
+    // k:  double | vector
     //      Lattice coefficients
     //      Lattice coefficients for FIR/IIR filter. Can be real or complex. 
     // v - double - vector
@@ -33,7 +33,7 @@ function [num,den] = latc2tf(k,varargin)
     //      Speficication of the type of FIR filter
     // 
     // Examples
-    // 1) FIR filter
+    // // FIR filter
     //      k1 = [1/2 1/2 1/4];
     //      [num1,den1] = latc2tf(k1);
     // 
@@ -119,7 +119,6 @@ function [num,den] = latc2tf(k,varargin)
             if size(arg2,1)==1 then
                 arg2 = arg2(:);
             end
-            
             [num,den] = latc2tf_iir2(k,arg2);
             
         else
@@ -154,7 +153,7 @@ function [num,den] = latc2tf_fir(k,option)
     num = 1;
 
     for j=2:p+1
-    	num = [num; 0] + k(j-1)*[0; conj(num($:-1:1,:))];
+        num = [num; 0] + k(j-1)*[0; conj(num($:-1:1,:))];
 	end
 
 	if option==1 then
@@ -177,7 +176,7 @@ function [num,den] = latc2tf_iir1(k)
     den = 1;
 
     for j=2:p+1
-    	den = [den; 0] + k(j-1)*[0; conj(den($:-1:1,:))];
+        den = [den; 0] + k(j-1)*[0; conj(den($:-1:1,:))];
 	end
 
 	num = conj(den($:-1:1));
@@ -204,20 +203,25 @@ function [num,den] = latc2tf_iir2(k,v)
         if diff>0 then
             v = [v; zeros(diff,1)];
         elseif diff<0 then
-        	k = [k; zeros(-diff,1)];
-    	end
+            k = [k; zeros(-diff,1)];
+        end
 
 
         p = length(k);
-    	den = 1;
+        den = 1;
 
-    	for j=2:p+1
-	    	den = [den; 0] + k(j-1)*[0; conj(den($:-1:1,:))];
-		end
+        for j=2:p+1
+            den = [den; 0] + k(j-1)*[0; conj(den($:-1:1,:))];
+        end
+        
+        disp(den);
         
         exec('rlevinson.sci',-1);
 
-        [r,temp] = rlevinson(den,1);
+        [r,temp] = rlevinson(den',1);
+        
+        disp(r);
+        disp(temp);
 
         num = (temp*v);
     end    

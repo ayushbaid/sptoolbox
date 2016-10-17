@@ -2,7 +2,6 @@
 function varargout = pmusic(varargin)
     // Psuedospectrum using MUSIC algorithm
     //
-    // Note: does not implement the plotting functionality as in matlab
     // Calling Sequence
     // [S,w] = pmusic(x,p)
     // [S,w] = pmusic(x,p,w)
@@ -15,59 +14,45 @@ function varargout = pmusic(varargin)
     // [...,v,e] = pmusic(...)
     //
     // Parameters:
-    // x - int|double - vector|matrix
-    //      Input signal. In case of a matrix, each row of x represents a 
-    //      seperate observation of the signal. If 'corr' flag is specified, 
-    //      then x is the correlation matrix.
-    //      If w is not specified in the input, it is determined by the 
-    //      algorithm. If x is real valued, then range of w is [0, pi]. 
-    //      Otherwise, the range of w is [0, 2pi)
-    // p - int|double - scalar|vector
-    //      p(1) is the dimension of the signal subspace
-    //      p(2), if specified, represents a threshold that is multiplied by 
-    //      the smallest estimated eigenvalue of the signal's correlation matrix.
-    // w - int|double - vector
-    //      w is the vector of normalized frequencies over which the 
-    //      pseuspectrogram is to be computed.
-    // nfft - int - scalar (Default = 256)
-    //      Length of the fft used to compute pseudospectrum. The length of S
-    //      (and hence w/f) depends on the type of values in x and nfft.
-    //      If x is real, length of s is (nfft/2 + 1) {Range of w = [0, pi]} if 
-    //      nfft is even and (nfft+1)/2 {Range of w = [0, pi)} otherwise.
-    //      If x is complex, length of s is nfft.
-    // fs - int|double - scalar (Default = 1)
-    //      Sampling rate. Used to convert the normalized frequencies (w) to 
-    //      actual values (f) and vice-versa.
-    // nwin - int|double - scalar (int only)|vector (Default = 2*p(1))
-    //      If nwin is scalar, it is the length of the rectangular window.
-    //      Otherwise, the vector input is considered as the window coefficients.
-    //      Not used if 'corr' flag present.
-    //      If x is a vector, windowing not done in nwin in scalar. If x is a 
-    //      matrix, 
-    // noverlap - int - scalar (Default = nwin-1)
-    //      number of points by which successive windows overlap. noverlap not 
-    //      used if x is a matrix
-    // freqrange - string
-    //      The range of frequencies over which the pseudospetrogram is 
-    //      computed. Three possible values - 'onesided', 'twosided', 'centered'
-    // 'corr' flag
-    //      Presence indicates that the primary input x is actually a 
-    //      correlation matrix
+    // x: Input signal. In case of a matrix, each row of x represents a seperate observation of the signal. If 'corr' flag is specified, then x is the correlation matrix.
+    // p: p(1) is the dimension of the signal subspace. p(2), if specified, represents a threshold that is multiplied by the smallest estimated eigenvalue of the signal's correlation matrix.
+    // w: Vector of normalized frequencies over which the pseuspectrogram is to be computed. If w is not specified in the input, it is determined by the algorithm. If x is real valued, then range of w is [0, pi]. Otherwise, the range of w is [0, 2pi)
+    // nfft: Length of the fft used to compute pseudospectrum. Should be a natural number. Default value of 256.
+    // fs: Sampling rate. Used to convert the normalized frequencies (w) to actual values (f) and vice-versa. Assumes a default value of 1 Hz.
+    // nwin: Window length/vector. If nwin is scalar, is must be a natural number and denoted the length of rectangular window. Otherwise, the vector input is considered as the window coefficients and must have the same length as a column of x. Not used if 'corr' flag present. If x is a matrix and nwin is scalar (window length), windowing is not performed.Assumes a default value of 2*p(1)
+    // noverlap: Number of sample points by which successive windows overlap. Not used if x is a matrix. Should be a natural number. Assumes default value of (window length-1).
+    // freqrange: Range of frequencies to include in f or w. Three possible values - 'onesided', 'twosided', 'centered'
+    // 'corr' flag: Indicates that the primary input x is actually a correlation matrix
+    // S: Pseudospectrum Estimate.
+    // f: Frequency corresponding to S
+    // w: Normalized Frquency corresponding to S
+    //
+    // Description
+    // The length of S (and hence w/f) depends on the type of values in x and nfft.
+    // If x is real, length of s is (nfft/2 + 1) {Range of w = [0, pi]}. If nfft is even and (nfft+1)/2 {Range of w = [0, pi)} otherwise.
+    // If x is complex, length of s is nfft.
+    // 
     //
     // Examples:
-    // TODO:
+    // // Pseudospectrum of two sinusoids with additive noise
+    //          
     //
     // See also
-    // pburg | peig | periodogram | pmtm | prony | pwelch | rooteig | rootmusic
+    // pburg
+    // peig
+    // periodogram
+    // pmtm
+    // prony
+    // pwelch
+    // rooteig
+    // rootmusic
     //
     // Authors
     // Ayush Baid
     //
     // References
-    // [1] Petre Stoica and Randolph Moses, Introduction To Spectral
-    //     Analysis, Prentice-Hall, 1997, pg. 15
-    // [2] S. J. Orfanidis, Optimum Signal Processing. An Introduction. 
-    //     2nd Ed., Macmillan, 1988.
+    // [1] Petre Stoica and Randolph Moses, Introduction To Spectral Analysis, Prentice-Hall, 1997, pg. 15
+    // [2] S. J. Orfanidis, Optimum Signal Processing, An Introduction. 2nd Ed., Macmillan, 1988.
     
     funcprot(0);
     

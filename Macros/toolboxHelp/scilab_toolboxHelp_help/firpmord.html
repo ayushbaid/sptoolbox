@@ -1,0 +1,110 @@
+<html><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>firpmord</title>
+    <style type="text/css" media="all">
+      @import url("scilab_code.css");
+      @import url("xml_code.css");
+      @import url("c_code.css");
+      @import url("style.css");
+    </style>
+  </head>
+  <body>
+    <div class="manualnavbar">
+    <table width="100%"><tr>
+      <td width="30%">
+    	<span class="previous"><a href="cummin.html">&lt;&lt; cummin</a></span>
+
+      </td>
+      <td width="40%" class="center">
+      	<span class="top"><a href="section_16d6f611be3c1b73f3d21acd82af33fe.html">Signal Processing Toolbox</a></span>
+
+      </td>
+      <td width="30%" class="next">
+      	
+      </td>
+    </tr></table>
+      <hr />
+    </div>
+
+
+
+    <span class="path"><a href="index.html">Signal Processing Toolbox</a> &gt;&gt; <a href="section_16d6f611be3c1b73f3d21acd82af33fe.html">Signal Processing Toolbox</a> &gt; firpmord</span>
+
+    <br /><br />
+    <div class="refnamediv"><h1 class="refname">firpmord</h1>
+    <p class="refpurpose">Parks-McClennan optimal FIR filter order estimation</p></div>
+
+
+<div class="refsynopsisdiv"><h3 class="title">Calling Sequence</h3>
+   <div class="synopsis"><pre><span class="default">[</span><span class="default">n</span><span class="default">,</span><span class="default">fo</span><span class="default">,</span><span class="default">ao</span><span class="default">,</span><span class="default">w</span><span class="default">] = </span><span class="functionid">firpmord</span><span class="default">(</span><span class="default">f</span><span class="default">,</span><span class="default">a</span><span class="default">,</span><span class="default">dev</span><span class="default">)</span>
+<span class="default">[</span><span class="default">n</span><span class="default">,</span><span class="default">fo</span><span class="default">,</span><span class="default">ao</span><span class="default">,</span><span class="default">w</span><span class="default">] = </span><span class="functionid">firpmord</span><span class="default">(</span><span class="default">f</span><span class="default">,</span><span class="default">a</span><span class="default">,</span><span class="default">dev</span><span class="default">,</span><span class="default">fs</span><span class="default">)</span></pre></div></div>
+
+<div class="refsection"><h3 class="title">Parameters</h3>
+   <dl><dt><span class="term">f:</span>
+      <dd><p class="para">Frequency Band Edges. Band edges should be in 0 and fs/2. f should be a vector of positive reals and have length 2 less than that of a.</p></dd></dt>
+   <dt><span class="term">a:</span>
+      <dd><p class="para">Desired amplitudes at the frequency bands specified by f. a should be a vector of positive reals.</p></dd></dt>
+   <dt><span class="term">dev:</span>
+      <dd><p class="para">Maximum Allowable Deviations. Maximum acceptable deviations or ripples between the frequency response and the desired amplitudes in the frequency bands specified by f. Must be a vector of positive reals with length same as a</p></dd></dt>
+   <dt><span class="term">fs:</span>
+      <dd><p class="para">Sampling Frequency. Should be a positive real scalar</p></dd></dt>
+   <dt><span class="term">n:</span>
+      <dd><p class="para">Filter Order. Should be an natural number</p></dd></dt>
+   <dt><span class="term">fo:</span>
+      <dd><p class="para">Frequency. Vector of positive reals</p></dd></dt>
+   <dt><span class="term">ao:</span>
+      <dd><p class="para">Amplitude Response. Contains amplitude response values at the corresponding frequencies in fo. Vector of positive reals</p></dd></dt>
+   <dt><span class="term">w:</span>
+      <dd><p class="para">Weights. Vector of reals</p></dd></dt></dl></div>
+
+<div class="refsection"><h3 class="title">Examples</h3>
+   <div class="programlisting"><table border="0" width="100%"><tr><td width="98%"><pre class="scilabcode"><span class="scilabcomment">// A low-pass filter</span>
+<span class="scilabid">f</span> <span class="scilaboperator">=</span> <span class="scilabopenclose">[</span><span class="scilabnumber">1200</span> <span class="scilabnumber">1600</span><span class="scilabopenclose">]</span><span class="scilabdefault">;</span>        <span class="scilabcomment">// frequency edges for bands</span>
+<span class="scilabid">a</span> <span class="scilaboperator">=</span> <span class="scilabopenclose">[</span><span class="scilabnumber">1</span> <span class="scilabnumber">0</span><span class="scilabopenclose">]</span><span class="scilabdefault">;</span>              <span class="scilabcomment">// desired amplitude for each band</span>
+<span class="scilabid">dev</span> <span class="scilaboperator">=</span> <span class="scilabopenclose">[</span><span class="scilabnumber">0.05</span> <span class="scilabnumber">0.1</span><span class="scilabopenclose">]</span><span class="scilabdefault">;</span>       <span class="scilabcomment">// Acceptable deviation for each band</span>
+<span class="scilabid">fs</span> <span class="scilaboperator">=</span> <span class="scilabnumber">8000</span><span class="scilabdefault">;</span>              <span class="scilabcomment">// Sampling frequency</span>
+<span class="scilabopenclose">[</span><span class="scilabid">n</span><span class="scilabdefault">,</span><span class="scilabid">fo</span><span class="scilabdefault">,</span><span class="scilabid">ao</span><span class="scilabdefault">,</span><span class="scilabid">w</span><span class="scilabopenclose">]</span> <span class="scilaboperator">=</span> <span class="scilabid">firpmord</span><span class="scilabopenclose">(</span><span class="scilabid">f</span><span class="scilabdefault">,</span><span class="scilabid">a</span><span class="scilabdefault">,</span><span class="scilabid">dev</span><span class="scilabdefault">,</span><span class="scilabid">fs</span><span class="scilabopenclose">)</span><span class="scilabdefault">;</span>
+
+<span class="scilabcomment">// A bandstop filter</span>
+<span class="scilabid">f</span> <span class="scilaboperator">=</span> <span class="scilabopenclose">[</span><span class="scilabnumber">1000</span> <span class="scilabnumber">1800</span> <span class="scilabnumber">2400</span> <span class="scilabnumber">3000</span><span class="scilabopenclose">]</span><span class="scilabdefault">;</span>
+<span class="scilabid">a</span> <span class="scilaboperator">=</span> <span class="scilabopenclose">[</span><span class="scilabnumber">1</span> <span class="scilabnumber">0</span> <span class="scilabnumber">0.5</span><span class="scilabopenclose">]</span><span class="scilabdefault">;</span>
+<span class="scilabid">dev</span> <span class="scilaboperator">=</span> <span class="scilabopenclose">[</span><span class="scilabnumber">0.01</span> <span class="scilabnumber">0.1</span> <span class="scilabnumber">0.03</span><span class="scilabopenclose">]</span><span class="scilabdefault">;</span>
+<span class="scilabid">fs</span> <span class="scilaboperator">=</span> <span class="scilabnumber">8000</span><span class="scilabdefault">;</span>
+<span class="scilabopenclose">[</span><span class="scilabid">n</span><span class="scilabdefault">,</span><span class="scilabid">fo</span><span class="scilabdefault">,</span><span class="scilabid">ao</span><span class="scilabdefault">,</span><span class="scilabid">w</span><span class="scilabopenclose">]</span> <span class="scilaboperator">=</span> <span class="scilabid">firpmord</span><span class="scilabopenclose">(</span><span class="scilabid">f</span><span class="scilabdefault">,</span><span class="scilabid">a</span><span class="scilabdefault">,</span><span class="scilabid">dev</span><span class="scilabdefault">,</span><span class="scilabid">fs</span><span class="scilabopenclose">)</span><span class="scilabdefault">;</span></pre></td><td valign="top"><a href="scilab://scilab.execexample/"><img src="ScilabExecute.png" border="0"/></a></td><td valign="top"><a href="scilab://scilab.editexample/"><img src="ScilabEdit.png" border="0"/></a></td><td></td></tr></table></div></div>
+
+<div class="refsection"><h3 class="title">See also</h3>
+   <ul class="itemizedlist"><li class="member"><a href="scilab://buttord" class="link">buttord</a></li>
+   <li class="member"><a href="scilab://cheb1ord" class="link">cheb1ord</a></li>
+   <li class="member"><a href="scilab://cheb2ord" class="link">cheb2ord</a></li>
+   <li class="member"><a href="scilab://ellipord" class="link">ellipord</a></li>
+   <li class="member"><a href="scilab://firpm" class="link">firpm</a></li>
+   <li class="member"><a href="scilab://kaiserord" class="link">kaiserord</a></li></ul></div>
+
+<div class="refsection"><h3 class="title">Authors</h3>
+   <ul class="itemizedlist"><li class="member">Ayush Baid</li></ul></div>
+
+<div class="refsection"><h3 class="title">Bibliography</h3>
+   <p class="para">[1] Rabiner, Lawrence R., and Bernard Gold. &#0034;Theory and application of digital signal processing.&#0034; Englewood Cliffs, NJ, Prentice-Hall, Inc., 1975. 777 p. 156-7 (1975).</p>
+   <p class="para">[2] Rabiner, Lawrence R., and Otto Herrmann. &#0034;The predictability of certain  optimum finite-impulse-response digital filters.&#0034; Circuit Theory, IEEE Transactions on 20.4 (1973): 401-408.</p></div>
+    <br />
+
+    <div class="manualnavbar">
+    <table width="100%">
+    <tr><td colspan="3" class="next"><a href="http://bugzilla.scilab.org/enter_bug.cgi?product=Scilab%20software&component=Documentation%20pages" class="ulink">Report an issue</a></td></tr>
+<tr>
+      <td width="30%">
+    	<span class="previous"><a href="cummin.html">&lt;&lt; cummin</a></span>
+
+      </td>
+      <td width="40%" class="center">
+      	<span class="top"><a href="section_16d6f611be3c1b73f3d21acd82af33fe.html">Signal Processing Toolbox</a></span>
+
+      </td>
+      <td width="30%" class="next">
+      	
+      </td>
+    </tr></table>
+      <hr />
+    </div>
+  </body>
+</html>

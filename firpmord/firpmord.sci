@@ -1,42 +1,31 @@
 function [n, fo, ao, w] = firpmord(f, a, dev, varargin)
 // Parks-McClennan optimal FIR filter order estimation
 //
-//
-// Calling sequence
+// Calling Sequence
 // [n,fo,ao,w] = firpmord(f,a,dev)
 // [n,fo,ao,w] = firpmord(f,a,dev,fs)
 //
 // 
 // Parameters
-// f: double - positive - vector
-//      Frequency band edges (between 0 and Fs/2).
-//      Length of f is two less than the length of a.
-// a: double - positive - vector
-//      Desired amplitudes at the frequency bands specified by f.
-// dev: double - positive - vector
-//      Maximum allowable deviations.
-//      Maximum acceptable deviations or ripples between the frequency response
-//      and the desired amplitudes in the frequency bands specified by f. Must have 
-//      the same length as a.
-// n: int - scalar
-//      Filter order
-// fo: double - positive - vector
-//      Frequency vector
-// ao: double - positive - vector
-//      Amplitude vector
-// w: double - vector
-//      Weights
+// f: Frequency Band Edges. Band edges should be in 0 and fs/2. f should be a vector of positive reals and have length 2 less than that of a.
+// a: Desired amplitudes at the frequency bands specified by f. a should be a vector of positive reals.
+// dev: Maximum Allowable Deviations. Maximum acceptable deviations or ripples between the frequency response and the desired amplitudes in the frequency bands specified by f. Must be a vector of positive reals with length same as a
+// fs: Sampling Frequency. Should be a positive real scalar
+// n: Filter Order. Should be an natural number
+// fo: Frequency. Vector of positive reals
+// ao: Amplitude Response. Contains amplitude response values at the corresponding frequencies in fo. Vector of positive reals
+// w: Weights. Vector of reals
 //
 // 
 // Examples
-// [1] A low-pass filter
-//          f = [1500 2000];        // frequency edges for bands
+// // A low-pass filter
+//          f = [1200 1600];        // frequency edges for bands
 //          a = [1 0];              // desired amplitude for each band
-//          dev = [0.01 0.1];       // Acceptable deviation for each band
+//          dev = [0.05 0.1];       // Acceptable deviation for each band
 //          fs = 8000;              // Sampling frequency
 //          [n,fo,ao,w] = firpmord(f,a,dev,fs);
 //
-// [2] A bandstop filter
+// // A bandstop filter
 //          f = [1000 1800 2400 3000];
 //          a = [1 0 0.5];
 //          dev = [0.01 0.1 0.03];
@@ -44,20 +33,22 @@ function [n, fo, ao, w] = firpmord(f, a, dev, varargin)
 //          [n,fo,ao,w] = firpmord(f,a,dev,fs);
 //
 //
-// References
-// [1] Rabiner, Lawrence R., and Bernard Gold. "Theory and application of 
-//     digital signal processing." Englewood Cliffs, NJ, Prentice-Hall, Inc., 
-//     1975. 777 p. 156-7 (1975).
-// [2] Rabiner, Lawrence R., and Otto Herrmann. "The predictability of certain 
-//     optimum finite-impulse-response digital filters." Circuit Theory, 
-//     IEEE Transactions on 20.4 (1973): 401-408.
+//
+// See also
+// buttord
+// cheb1ord
+// cheb2ord
+// ellipord
+// firpm
+// kaiserord
+//
 //
 // Authors
 // Ayush Baid
 //
-//
-// See Also
-// buttord | cheb1ord | cheb2ord | ellipord | firpm | kaiserord
+// Bibliography
+// [1] Rabiner, Lawrence R., and Bernard Gold. "Theory and application of digital signal processing." Englewood Cliffs, NJ, Prentice-Hall, Inc., 1975. 777 p. 156-7 (1975).
+// [2] Rabiner, Lawrence R., and Otto Herrmann. "The predictability of certain  optimum finite-impulse-response digital filters." Circuit Theory, IEEE Transactions on 20.4 (1973): 401-408.
 
     [numOutArgs,numInArgs] = argn(0);
     

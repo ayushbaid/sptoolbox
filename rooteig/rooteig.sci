@@ -83,16 +83,19 @@ function [w,pow] = rooteig(x,p,varargin)
     // searching for the 'corr' flag
     isCorrFlag = %F;
     
-    if varargLength==0 then
-        stringIndices = [];
-    else
-        stringIndices = find(type(varargin(1:varargLength))==10);
+    stringIndices = [];
+    if varargLength~=0 then
+        for i=1:varargLength
+            if type(varargin(i))==10 then
+                stringIndices = [stringIndices i];
+            end
+        end
     end
     
     if ~isempty(stringIndices) then
         // ignoring all other strings except the corr flag
         isCorrFlag = or(strcmpi(varargin(stringIndices),"corr")==0);
-        varargin(stringIndices) = [];
+        varargin(stringIndices) = null();
     end
     
     // varargin can have only an entry for fs

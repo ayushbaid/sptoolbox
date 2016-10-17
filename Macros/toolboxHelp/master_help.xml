@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book [
+<!--Begin Entities-->
+<!ENTITY a957422d9236c382a5469a18476c715a7 SYSTEM "/home/ayush/dev/scilab_workspace/sptoolbox/Macros/toolboxHelp/cummax.xml">
+<!ENTITY abe1818fa1070957b070b33b550a0fa0c SYSTEM "/home/ayush/dev/scilab_workspace/sptoolbox/Macros/toolboxHelp/cummin.xml">
+<!ENTITY a16c165613ac038ec02994d15b468c6ee SYSTEM "/home/ayush/dev/scilab_workspace/sptoolbox/Macros/toolboxHelp/firpmord.xml">
+<!--End Entities-->
+]>
+<book version="5.0-subset Scilab" xml:lang="toolboxHelp"
+      xmlns="http://docbook.org/ns/docbook"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      xmlns:svg="http://www.w3.org/2000/svg"
+      xmlns:mml="http://www.w3.org/1998/Math/MathML"
+      xmlns:html="http://www.w3.org/1999/xhtml"
+      xmlns:db="http://docbook.org/ns/docbook">
+  <info xml:id='signal_processing_toolbox_manual'>
+    <title>Signal Processing Toolbox</title>
+  </info>
+
+<part xml:id='section_16d6f611be3c1b73f3d21acd82af33fe'>
+<title>Signal Processing Toolbox</title>
+&a957422d9236c382a5469a18476c715a7;
+&abe1818fa1070957b070b33b550a0fa0c;
+&a16c165613ac038ec02994d15b468c6ee;
+</part>
+</book>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ *
+ * This help file was generated from firpmord.sci using help_from_sci().
+ *
+ -->
+
+<refentry version="5.0-subset Scilab" xml:id="firpmord" xml:lang="en"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:ns3="http://www.w3.org/1999/xhtml"
+          xmlns:mml="http://www.w3.org/1998/Math/MathML"
+          xmlns:scilab="http://www.scilab.org"
+          xmlns:db="http://docbook.org/ns/docbook">
+
+  <refnamediv>
+    <refname>firpmord</refname>
+    <refpurpose>Parks-McClennan optimal FIR filter order estimation</refpurpose>
+  </refnamediv>
+
+
+<refsynopsisdiv>
+   <title>Calling Sequence</title>
+   <synopsis>
+   [n,fo,ao,w] = firpmord(f,a,dev)
+   [n,fo,ao,w] = firpmord(f,a,dev,fs)
+   
+   
+   </synopsis>
+</refsynopsisdiv>
+
+<refsection>
+   <title>Parameters</title>
+   <variablelist>
+   <varlistentry><term>f:</term>
+      <listitem><para> Frequency Band Edges. Band edges should be in 0 and fs/2. f should be a vector of positive reals and have length 2 less than that of a.</para></listitem></varlistentry>
+   <varlistentry><term>a:</term>
+      <listitem><para> Desired amplitudes at the frequency bands specified by f. a should be a vector of positive reals.</para></listitem></varlistentry>
+   <varlistentry><term>dev:</term>
+      <listitem><para> Maximum Allowable Deviations. Maximum acceptable deviations or ripples between the frequency response and the desired amplitudes in the frequency bands specified by f. Must be a vector of positive reals with length same as a</para></listitem></varlistentry>
+   <varlistentry><term>fs:</term>
+      <listitem><para> Sampling Frequency. Should be a positive real scalar</para></listitem></varlistentry>
+   <varlistentry><term>n:</term>
+      <listitem><para> Filter Order. Should be an natural number</para></listitem></varlistentry>
+   <varlistentry><term>fo:</term>
+      <listitem><para> Frequency. Vector of positive reals</para></listitem></varlistentry>
+   <varlistentry><term>ao:</term>
+      <listitem><para> Amplitude Response. Contains amplitude response values at the corresponding frequencies in fo. Vector of positive reals</para></listitem></varlistentry>
+   <varlistentry><term>w:</term>
+      <listitem><para> Weights. Vector of reals</para></listitem></varlistentry>
+   </variablelist>
+</refsection>
+
+<refsection>
+   <title>Examples</title>
+   <programlisting role="example"><![CDATA[
+// A low-pass filter
+f = [1200 1600];        // frequency edges for bands
+a = [1 0];              // desired amplitude for each band
+dev = [0.05 0.1];       // Acceptable deviation for each band
+fs = 8000;              // Sampling frequency
+[n,fo,ao,w] = firpmord(f,a,dev,fs);
+
+// A bandstop filter
+f = [1000 1800 2400 3000];
+a = [1 0 0.5];
+dev = [0.01 0.1 0.03];
+fs = 8000;
+[n,fo,ao,w] = firpmord(f,a,dev,fs);
+
+
+
+   ]]></programlisting>
+</refsection>
+
+<refsection>
+   <title>See also</title>
+   <simplelist type="inline">
+   <member><link linkend="buttord">buttord</link></member>
+   <member><link linkend="cheb1ord">cheb1ord</link></member>
+   <member><link linkend="cheb2ord">cheb2ord</link></member>
+   <member><link linkend="ellipord">ellipord</link></member>
+   <member><link linkend="firpm">firpm</link></member>
+   <member><link linkend="kaiserord">kaiserord</link></member>
+   </simplelist>
+</refsection>
+
+<refsection>
+   <title>Authors</title>
+   <simplelist type="vert">
+   <member>Ayush Baid</member>
+   </simplelist>
+</refsection>
+
+<refsection>
+   <title>Bibliography</title>
+   <para>[1] Rabiner, Lawrence R., and Bernard Gold. "Theory and application of digital signal processing." Englewood Cliffs, NJ, Prentice-Hall, Inc., 1975. 777 p. 156-7 (1975).</para>
+   <para>[2] Rabiner, Lawrence R., and Otto Herrmann. "The predictability of certain  optimum finite-impulse-response digital filters." Circuit Theory, IEEE Transactions on 20.4 (1973): 401-408.</para>
+</refsection>
+</refentry>

@@ -1,0 +1,89 @@
+<html><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>cummin</title>
+    <style type="text/css" media="all">
+      @import url("scilab_code.css");
+      @import url("xml_code.css");
+      @import url("c_code.css");
+      @import url("style.css");
+    </style>
+  </head>
+  <body>
+    <div class="manualnavbar">
+    <table width="100%"><tr>
+      <td width="30%">
+    	<span class="previous"><a href="cummax.html">&lt;&lt; cummax</a></span>
+
+      </td>
+      <td width="40%" class="center">
+      	<span class="top"><a href="section_16d6f611be3c1b73f3d21acd82af33fe.html">Signal Processing Toolbox</a></span>
+
+      </td>
+      <td width="30%" class="next">
+      	<span class="next"><a href="firpmord.html">firpmord &gt;&gt;</a></span>
+
+      </td>
+    </tr></table>
+      <hr />
+    </div>
+
+
+
+    <span class="path"><a href="index.html">Signal Processing Toolbox</a> &gt;&gt; <a href="section_16d6f611be3c1b73f3d21acd82af33fe.html">Signal Processing Toolbox</a> &gt; cummin</span>
+
+    <br /><br />
+    <div class="refnamediv"><h1 class="refname">cummin</h1>
+    <p class="refpurpose">Cumulative minimum</p></div>
+
+
+<div class="refsynopsisdiv"><h3 class="title">Calling Sequence</h3>
+   <div class="synopsis"><pre><span class="default">M</span><span class="default"> = </span><span class="functionid">cummin</span><span class="default">(</span><span class="default">A</span><span class="default">)</span>
+<span class="default">M</span><span class="default"> = </span><span class="functionid">cummin</span><span class="default">(</span><span class="default">A</span><span class="default">,</span><span class="default">dim</span><span class="default">)</span>
+<span class="default">M</span><span class="default"> = </span><span class="functionid">cummin</span><span class="default">(</span><span class="default">_</span><span class="default">,</span><span class="default">direction</span><span class="default">)</span></pre></div></div>
+
+<div class="refsection"><h3 class="title">Parameters</h3>
+   <dl><dt><span class="term">A:</span>
+      <dd><p class="para">Input Array. Can be real or complex and a vector or matrix. For complex elements, cummin compares the magnitude of elements. If the magnitude are same, phase angles are compared.</p></dd></dt>
+   <dt><span class="term">dim:</span>
+      <dd><p class="para">Dimension to operate along. If no dimension is specified, then the default value is the first array dimension whose value is greater than 1. Should be a natural number.</p></dd></dt>
+   <dt><span class="term">direction:</span>
+      <dd><p class="para">Direction of operation. String flag - &#0039;forward&#0039; (default) or &#0039;reverse&#0039;</p></dd></dt></dl></div>
+
+<div class="refsection"><h3 class="title">Examples</h3>
+   <div class="programlisting"><table border="0" width="100%"><tr><td width="98%"><pre class="scilabcode"><span class="scilabcomment">// Cumulative minimum values in a vector</span>
+<span class="scilabid">v</span> <span class="scilaboperator">=</span> <span class="scilabopenclose">[</span><span class="scilabnumber">8</span> <span class="scilabnumber">9</span> <span class="scilabnumber">1</span> <span class="scilabnumber">10</span> <span class="scilabnumber">6</span> <span class="scilabnumber">1</span> <span class="scilabnumber">3</span> <span class="scilabnumber">6</span> <span class="scilabnumber">10</span> <span class="scilabnumber">10</span><span class="scilabopenclose">]</span>
+<span class="scilabid">M</span> <span class="scilaboperator">=</span> <span class="scilabid">cummin</span><span class="scilabopenclose">(</span><span class="scilabid">v</span><span class="scilabopenclose">)</span>
+<span class="scilabcomment">// Expected output: [8 8 1 1 1 1 1 1 1 1]</span></pre></td><td valign="top"><a href="scilab://scilab.execexample/"><img src="ScilabExecute.png" border="0"/></a></td><td valign="top"><a href="scilab://scilab.editexample/"><img src="ScilabEdit.png" border="0"/></a></td><td></td></tr></table></div></div>
+
+<div class="refsection"><h3 class="title">See also</h3>
+   <ul class="itemizedlist"><li class="member"><a href="cummax.html" class="link">cummax</a></li>
+   <li class="member"><a href="scilab://cumprod" class="link">cumprod</a></li>
+   <li class="member"><a href="scilab://cumsum" class="link">cumsum</a></li>
+   <li class="member"><a href="scilab://max" class="link">max</a></li>
+   <li class="member"><a href="scilab://min" class="link">min</a></li></ul></div>
+
+<div class="refsection"><h3 class="title">Authors</h3>
+   <ul class="itemizedlist"><li class="member">Ayush Baid</li></ul></div>
+    <br />
+
+    <div class="manualnavbar">
+    <table width="100%">
+    <tr><td colspan="3" class="next"><a href="http://bugzilla.scilab.org/enter_bug.cgi?product=Scilab%20software&component=Documentation%20pages" class="ulink">Report an issue</a></td></tr>
+<tr>
+      <td width="30%">
+    	<span class="previous"><a href="cummax.html">&lt;&lt; cummax</a></span>
+
+      </td>
+      <td width="40%" class="center">
+      	<span class="top"><a href="section_16d6f611be3c1b73f3d21acd82af33fe.html">Signal Processing Toolbox</a></span>
+
+      </td>
+      <td width="30%" class="next">
+      	<span class="next"><a href="firpmord.html">firpmord &gt;&gt;</a></span>
+
+      </td>
+    </tr></table>
+      <hr />
+    </div>
+  </body>
+</html>

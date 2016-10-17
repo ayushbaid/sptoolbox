@@ -1,43 +1,32 @@
 function M = cummin(varargin)
-    // Cumulative minimum
-    //
-    // Calling Sequence
-    // M = cummin(A)
-    //      returns the cumulative minimum of the arguments of A. The dimension 
-    //      of M is same as the dimension of A. If A is a 2D matrix, the operation
-    //      is performed along the columns. For a hypermatrix, the operation is
-    //      performed along the first non-zero dimension
-    // M = cummin(A,dim)
-    //      The operation is performed along the dimension specified by dim
-    // M = cummin(_,direction)
-    //      direction specifies as the direction of operation
-    //
-    // Parameters
-    // A - real|complex numbers - vector|matrix
-    //     Input Array
-    //     For complex elements, cummin compares the magnitude of elements. If
-    //     the magnitude are same, phase angles are compared.
-    // dim - positive integer - scalar  
-    //     Dimension to operate along
-    //     If no dimension is specified, then the default value is the first 
-    //     array dimension whose value is greater than 1
-    // direction - string flag - 'forward' (default) or 'reverse'
-    //     Direction of cumulation
-    //     If the direction is forward, cummin works from 1 to end of the active
-    //     dimension. Otherwise, it works in the opposite sense
-    //
-    // Examples
-    // 1) Cumulative minimum values in a vector
-    //     v = [8 9 1 10 6 1 3 6 10 10]
-    //     M = cummin(v)
-    //        
-    // Expected output: [8 8 1 1 1 1 1 1 1 1]
-    //
-    // Authors
-    // Ayush Baid
-    //
-    // See Also
-    // cummax | cumprod | cumsum | max | min
+// Cumulative minimum
+//
+// Calling Sequence
+// M = cummin(A)
+// M = cummin(A,dim)
+// M = cummin(_,direction)
+//
+// Parameters
+// A: Input Array. Can be real or complex and a vector or matrix. For complex elements, cummin compares the magnitude of elements. If the magnitude are same, phase angles are compared.
+// dim: Dimension to operate along. If no dimension is specified, then the default value is the first array dimension whose value is greater than 1. Should be a natural number.
+// direction: Direction of operation. String flag - 'forward' (default) or 'reverse'
+//
+// Examples
+// // Cumulative minimum values in a vector
+//     v = [8 9 1 10 6 1 3 6 10 10]
+//     M = cummin(v)
+//     // Expected output: [8 8 1 1 1 1 1 1 1 1]
+//
+// See also
+// cummax
+// cumprod
+// cumsum
+// max
+// min
+//
+// Authors
+// Ayush Baid
+
     
     
 

@@ -151,8 +151,8 @@ function L = filternorm(b,a,varargin)
             // Using integration of a^(-x) to get a bound            
             N = mult*log(tol)/log(max_dist);
     
-            // get filter coeffs using impzlength from octave
-            h = impz(b,a,N);
+            // TODO: get filter coeffs using impzlength from octave
+            // TODO: h = impz(b,a,N);
             s = norm(h,2);
         end
     end

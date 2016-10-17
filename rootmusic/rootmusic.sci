@@ -55,11 +55,13 @@ function [w,pow] = rootmusic(x,p,varargin)
     //      estimated absolute value squared amplitudes of the sinusoids at 
     //      the frequencies w 
     //
+    // Dependencies
+    // lsqnonneg from Optimization toolbox (FOT)
     
     funcprot(0);
     
-    exec('musicBase.sci',-1);
-    exec('nnls.sci',-1);  
+    exec('musicBase.sci',-1); 
+    atomsLoad('FOT');
     
     
     // **** checking the number of input and output arguments ****
@@ -83,16 +85,19 @@ function [w,pow] = rootmusic(x,p,varargin)
     // searching for the 'corr' flag
     isCorrFlag = %F;
     
-    if varargLength==0 then
-        stringIndices = [];
-    else
-        stringIndices = find(type(varargin(1:varargLength))==10);
+    stringIndices = [];
+    if varargLength~=0 then
+        for i=1:varargLength
+            if type(varargin(i))==10 then
+                stringIndices = [stringIndices i];
+            end
+        end
     end
     
     if ~isempty(stringIndices) then
         // ignoring all other strings except the corr flag
         isCorrFlag = or(strcmpi(varargin(stringIndices),"corr")==0);
-        varargin(stringIndices) = [];
+        varargin(stringIndices) = null();
     end
     
     // varargin can have only an entry for fs
@@ -218,9 +223,11 @@ function [w,pow] = rootmusic(x,p,varargin)
     if isFsSpecified then
         w = w*fs/(2*%pi);
     end
-    
-    
+        
 endfunction
+
+
+
 
 function w = computeFreqs(noiseEigenvects,pEffective,EVFlag,eigenvals)
     // Computes the frequencies of the complex sinusoids using the roots of 
@@ -244,7 +251,7 @@ function w = computeFreqs(noiseEigenvects,pEffective,EVFlag,eigenvals)
     numOfNoiseEigenvects = size(noiseEigenvects,2);
     if EVFlag then
         // weights are the eigenvalues in the noise subspace
-        weights = eigenvals($-numOfNoiseEigenvects+1:$);
+        weights = eigenvals(($-numOfNoiseEigenvects+1):$);
     else
         weights = ones(numOfNoiseEigenvects,1);
     end
@@ -259,23 +266,26 @@ function w = computeFreqs(noiseEigenvects,pEffective,EVFlag,eigenvals)
     end
     
     roots = roots(D);
+    disp(roots);
+
+
     
     // selecting the roots inside the unit circle
     rootsSelected = roots(abs(roots)<1);
     
     // sort the roots in order of increasing distance from the unit circle
-    [dist,indices] = gsort(abs(rootsSelected)-1);
+    [dist,indices] = gsort(abs(rootsSelected) - 1);
     
     sortedRoots = rootsSelected(indices);
-    
+     
     if isempty(sortedRoots) then
         w = [];
     else
-        w = atan(imag(sortedRoots(1:pEffective)),real(sortedRoots(1:pEffective)));
+        w = atan(imag(sortedRoots(1:pEffective)),real(sortedRoots(1:pEffective))); 
     end
     
-    
 endfunction
+
 
 
 function power = computePower(signalEigenvects,eigenvals,w,pEffective,...
@@ -301,7 +311,7 @@ function power = computePower(signalEigenvects,eigenvals,w,pEffective,...
     b = eigenvals(1:pEffective) - sigma_noise;
     
     // Solving Ap=b with the constraint that all elements of p >=0
-    power = nnls(A,b+A*sqrt(%eps)*ones(pEffective,1));
+    power = lsqnonneg(A,b+A*sqrt(%eps)*ones(pEffective,1));
     
     
 endfunction
