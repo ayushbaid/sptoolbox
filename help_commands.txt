@@ -1,4 +1,4 @@
 help_from_sci('./Macros', './Macros/toolboxHelp');
 cd ./Macros/toolboxHelp;
 exec build_help.sce;
-help cummin;
+help peig;

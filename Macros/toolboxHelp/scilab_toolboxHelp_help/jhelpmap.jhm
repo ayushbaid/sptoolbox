@@ -6,4 +6,6 @@
 <mapID target="cummax" url="cummax.html"/>
 <mapID target="cummin" url="cummin.html"/>
 <mapID target="firpmord" url="firpmord.html"/>
+<mapID target="peig" url="peig.html"/>
+<mapID target="pmusic" url="pmusic.html"/>
 </map>

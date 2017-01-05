@@ -4,6 +4,8 @@
 <!ENTITY a957422d9236c382a5469a18476c715a7 SYSTEM "/home/ayush/dev/scilab_workspace/sptoolbox/Macros/toolboxHelp/cummax.xml">
 <!ENTITY abe1818fa1070957b070b33b550a0fa0c SYSTEM "/home/ayush/dev/scilab_workspace/sptoolbox/Macros/toolboxHelp/cummin.xml">
 <!ENTITY a16c165613ac038ec02994d15b468c6ee SYSTEM "/home/ayush/dev/scilab_workspace/sptoolbox/Macros/toolboxHelp/firpmord.xml">
+<!ENTITY ad25dc9d3a095d297c89f7bad99772eb1 SYSTEM "/home/ayush/dev/scilab_workspace/sptoolbox/Macros/toolboxHelp/peig.xml">
+<!ENTITY ac4ef9354c25d1f37852525897b876733 SYSTEM "/home/ayush/dev/scilab_workspace/sptoolbox/Macros/toolboxHelp/pmusic.xml">
 <!--End Entities-->
 ]>
 <book version="5.0-subset Scilab" xml:lang="toolboxHelp"
@@ -23,5 +25,7 @@
 &a957422d9236c382a5469a18476c715a7;
 &abe1818fa1070957b070b33b550a0fa0c;
 &a16c165613ac038ec02994d15b468c6ee;
+&ad25dc9d3a095d297c89f7bad99772eb1;
+&ac4ef9354c25d1f37852525897b876733;
 </part>
 </book>

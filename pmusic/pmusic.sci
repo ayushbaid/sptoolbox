@@ -13,10 +13,11 @@ function varargout = pmusic(varargin)
     // [...] = pmusic(...,freqrange)
     // [...,v,e] = pmusic(...)
     //
-    // Parameters:
+    //
+    // Parameters
     // x: Input signal. In case of a matrix, each row of x represents a seperate observation of the signal. If 'corr' flag is specified, then x is the correlation matrix.
     // p: p(1) is the dimension of the signal subspace. p(2), if specified, represents a threshold that is multiplied by the smallest estimated eigenvalue of the signal's correlation matrix.
-    // w: Vector of normalized frequencies over which the pseuspectrogram is to be computed. If w is not specified in the input, it is determined by the algorithm. If x is real valued, then range of w is [0, pi]. Otherwise, the range of w is [0, 2pi)
+    // w: Vector of normalized frequencies over which the pseuspectrogram is to be computed. If w is not specified in the input, it is determined by the algorithm. If x is real valued, then range of w is [0, pi]. Otherwise, the range of w is [0, 2pi).
     // nfft: Length of the fft used to compute pseudospectrum. Should be a natural number. Default value of 256.
     // fs: Sampling rate. Used to convert the normalized frequencies (w) to actual values (f) and vice-versa. Assumes a default value of 1 Hz.
     // nwin: Window length/vector. If nwin is scalar, is must be a natural number and denoted the length of rectangular window. Otherwise, the vector input is considered as the window coefficients and must have the same length as a column of x. Not used if 'corr' flag present. If x is a matrix and nwin is scalar (window length), windowing is not performed.Assumes a default value of 2*p(1)
@@ -26,15 +27,25 @@ function varargout = pmusic(varargin)
     // S: Pseudospectrum Estimate.
     // f: Frequency corresponding to S
     // w: Normalized Frquency corresponding to S
+    // v: Matrix of noise eigenvectors
+    // e: Eigenvalues associated with eigenvectors in v
+    //
     //
     // Description
-    // The length of S (and hence w/f) depends on the type of values in x and nfft.
-    // If x is real, length of s is (nfft/2 + 1) {Range of w = [0, pi]}. If nfft is even and (nfft+1)/2 {Range of w = [0, pi)} otherwise.
-    // If x is complex, length of s is nfft.
+    // pmusic computes the pseudospectrum using MUSIC (MUltiple Signal Classification). The algorithm uses the eigenspace of the signal's correlation matrix to estimate frequency content.
+    // The length of S (and hence w/f) depends on the type of values in x and nfft. If x is real, length of s is (nfft/2 + 1) {Range of w = [0, pi]}. If nfft is even and (nfft+1)/2 {Range of w = [0, pi)} otherwise. If x is complex, length of s is nfft.
     // 
     //
-    // Examples:
+    // Examples
     // // Pseudospectrum of two sinusoids with additive noise
+    //      n = 0:249;
+    //      x = sin(0.3*n*%pi) + sin(0.2*n*%pi) + 0.01*randn(size(n));
+    //      [S, w] = pmusic(x, 4);
+    // // Using windowing
+    //      n = 0:749;
+    //      x = sin(0.25*n*%pi) + 0.05*randn(size(n));
+    //      Xcorr =  corrmtx(x, 7, 'mod'); // Creating correlation matrix
+    //      [S, w] = pmusic(Xm, 2);
     //          
     //
     // See also
@@ -47,10 +58,12 @@ function varargout = pmusic(varargin)
     // rooteig
     // rootmusic
     //
+    //
     // Authors
     // Ayush Baid
     //
-    // References
+    //
+    // Bibliography
     // [1] Petre Stoica and Randolph Moses, Introduction To Spectral Analysis, Prentice-Hall, 1997, pg. 15
     // [2] S. J. Orfanidis, Optimum Signal Processing, An Introduction. 2nd Ed., Macmillan, 1988.
     

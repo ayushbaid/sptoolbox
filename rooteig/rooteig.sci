@@ -9,57 +9,47 @@ function [w,pow] = rooteig(x,p,varargin)
     // [w,pow] = rooteig(...,'corr')
     //
     // Parameters
-    // x - int|double - vector|matrix
-    //      Input signal.
-    //      If x is a vector, then it reprsenets one realization of the signal.
-    //      If x is a matrix, then each row represents a separate observation of
-    //      the signal. 
-    // p - int|double - scalar|2 element vector
-    //      p(1) is the signal subspace dimension and hence the number of 
-    //      complex exponentials in x.
-    //      p(2), if specified, represents a threshold that is multiplied by 
-    //      the smallest estimated eigenvalue of the signal's correlation 
-    //      matrix.
-    // fs - int|double - scalar
-    //      Sampling frequency (in Hz)
-    //      If fs is specified by an empty vector or unspecified, it defaults
-    //      to 1 Hz
-    // 'corr' flag
-    //      If specified, x is interpreted as a correlation matrix rather than
-    //      a matrix of the signal data. For x to be a correlation matrix, 
-    //      x must be a square matrix and all its eigenvalues must be 
-    //      nonnegative
+    // x: Input signal vector/matrix of a correlation matrix. If x is a vector, then it represents one realization of the signal. If x is a matrix, then each row represents a separate observation of the signal. For x to be a correlation matrix, x must be a square matrix and all its eigenvalues must be nonnegative 
+    // p: p(1) is the signal subspace dimension and hence the number of complex exponentials in x. p(2), if specified, represents a threshold that is multiplied by the smallest estimated eigenvalue of the signal's correlation matrix.
+    // fs: Sampling frequency (in Hz). If fs is an empty vector or unspecified, it defaults to 1 Hz
+    // 'corr' flag: If specified, x is interpreted as a correlation matrix rather than a matrix of the signal data. 
+    // w: Estimated normalized frequencies of the complex sinusoids
+    // f: Estimated frequencies of the complex sinusoids
+    // pow - estimated absolute value squared amplitudes of the sinusoids at frequencies w 
     //
-    // Examples:
-    //      1) 3 complex exponentials:
     //
-    //          n=0:99;   
-    //          s=exp(1i*pi/2*n)+2*exp(1i*pi/4*n)+exp(1i*pi/3*n)+randn(1,100);  
-    //          [W,P] = rooteig(s,3);
+    // Description
+    // rootmusic returns the frequencies in radians/sample for the p complex sinusoids that make up the input signal
     //
-    // Author
+    // Examples
+    // An additive mixture of 3 complex exponentials
+    //      n=0:99;
+    //      s=exp(1%i*%pi/5*n) + 2*exp(1%i*%pi/4*n) + exp(1i*pi/2*n) + 0.5 * randn(1,100);  
+    //      [W,P] = rootmusic(s,3);
+    //
+    //
+    // Authors
     // Ayush
     //
     // See also
-    // corrmtx | peig | pmusic | rootmusic
+    // corrmtx
+    // peig
+    // pmusic
+    // rootmusic
+    //
     //
     // References
-    // 1) Stoica, P. and R. Moses, INTRODUCTION TO SPECTRAL ANALYSIS, 
+    // [1] Stoica, P. and R. Moses, INTRODUCTION TO SPECTRAL ANALYSIS, 
     //    Prentice-Hall
     //
     //
-    // Output arguments
-    // w - double - vector
-    //      Estimated frequencies of the complex sinusoids
-    // pow - double - vector
-    //      estimated absolute value squared amplitudes of the sinusoids at 
-    //      the frequencies w 
-    //
+    // Dependencies
+    // lsqnonneg from Optimization toolbox (FOT)
     
     funcprot(0);
     
     exec('musicBase.sci',-1);
-    exec('nnls.sci',-1);  
+    atomsLoad('FOT');
     
     
     // **** checking the number of input and output arguments ****
@@ -304,8 +294,7 @@ function power = computePower(signalEigenvects,eigenvals,w,pEffective,...
     b = eigenvals(1:pEffective) - sigma_noise;
     
     // Solving Ap=b with the constraint that all elements of p >=0
-    power = nnls(A,b+A*sqrt(%eps)*ones(pEffective,1));
-    
+    power = lsqnonneg(A,b+A*sqrt(%eps)*ones(pEffective,1));
     
 endfunction
 

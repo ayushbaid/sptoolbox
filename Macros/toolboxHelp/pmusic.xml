@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ *
+ * This help file was generated from pmusic.sci using help_from_sci().
+ *
+ -->
+
+<refentry version="5.0-subset Scilab" xml:id="pmusic" xml:lang="en"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:ns3="http://www.w3.org/1999/xhtml"
+          xmlns:mml="http://www.w3.org/1998/Math/MathML"
+          xmlns:scilab="http://www.scilab.org"
+          xmlns:db="http://docbook.org/ns/docbook">
+
+  <refnamediv>
+    <refname>pmusic</refname>
+    <refpurpose>Psuedospectrum using MUSIC algorithm</refpurpose>
+  </refnamediv>
+
+
+<refsynopsisdiv>
+   <title>Calling Sequence</title>
+   <synopsis>
+   [S,w] = pmusic(x,p)
+   [S,w] = pmusic(x,p,w)
+   [S,w] = pmusic(x,p,nfft)
+   [S,w] = pmusic(x,p,nfft,fs)
+   [S,w] = pmusic(x,p,f,fs)
+   [S,f] = pmusic(...,'corr')
+   [S,f] = pmusic(x,p,nfft,fs,nwin,noverlap)
+   [...] = pmusic(...,freqrange)
+   [...,v,e] = pmusic(...)
+   
+   
+   </synopsis>
+</refsynopsisdiv>
+
+<refsection>
+   <title>Parameters</title>
+   <variablelist>
+   <varlistentry><term>x:</term>
+      <listitem><para> Input signal. In case of a matrix, each row of x represents a seperate observation of the signal. If 'corr' flag is specified, then x is the correlation matrix.</para></listitem></varlistentry>
+   <varlistentry><term>p:</term>
+      <listitem><para> p(1) is the dimension of the signal subspace. p(2), if specified, represents a threshold that is multiplied by the smallest estimated eigenvalue of the signal's correlation matrix.</para></listitem></varlistentry>
+   <varlistentry><term>w:</term>
+      <listitem><para> Vector of normalized frequencies over which the pseuspectrogram is to be computed. If w is not specified in the input, it is determined by the algorithm. If x is real valued, then range of w is [0, pi]. Otherwise, the range of w is [0, 2pi).</para></listitem></varlistentry>
+   <varlistentry><term>nfft:</term>
+      <listitem><para> Length of the fft used to compute pseudospectrum. Should be a natural number. Default value of 256.</para></listitem></varlistentry>
+   <varlistentry><term>fs:</term>
+      <listitem><para> Sampling rate. Used to convert the normalized frequencies (w) to actual values (f) and vice-versa. Assumes a default value of 1 Hz.</para></listitem></varlistentry>
+   <varlistentry><term>nwin:</term>
+      <listitem><para> Window length/vector. If nwin is scalar, is must be a natural number and denoted the length of rectangular window. Otherwise, the vector input is considered as the window coefficients and must have the same length as a column of x. Not used if 'corr' flag present. If x is a matrix and nwin is scalar (window length), windowing is not performed.Assumes a default value of 2*p(1)</para></listitem></varlistentry>
+   <varlistentry><term>noverlap:</term>
+      <listitem><para> Number of sample points by which successive windows overlap. Not used if x is a matrix. Should be a natural number. Assumes default value of (window length-1).</para></listitem></varlistentry>
+   <varlistentry><term>freqrange:</term>
+      <listitem><para> Range of frequencies to include in f or w. Three possible values - 'onesided', 'twosided', 'centered'</para></listitem></varlistentry>
+   <varlistentry><term>'corr' flag:</term>
+      <listitem><para> Indicates that the primary input x is actually a correlation matrix</para></listitem></varlistentry>
+   <varlistentry><term>S:</term>
+      <listitem><para> Pseudospectrum Estimate.</para></listitem></varlistentry>
+   <varlistentry><term>f:</term>
+      <listitem><para> Frequency corresponding to S</para></listitem></varlistentry>
+   <varlistentry><term>w:</term>
+      <listitem><para> Normalized Frquency corresponding to S</para></listitem></varlistentry>
+   <varlistentry><term>v:</term>
+      <listitem><para> Matrix of noise eigenvectors</para></listitem></varlistentry>
+   <varlistentry><term>e:</term>
+      <listitem><para> Eigenvalues associated with eigenvectors in v</para></listitem></varlistentry>
+   </variablelist>
+</refsection>
+
+<refsection>
+   <title>Description</title>
+   <para>
+pmusic computes the pseudospectrum using MUSIC (MUltiple Signal Classification). The algorithm uses the eigenspace of the signal's correlation matrix to estimate frequency content.
+The length of S (and hence w/f) depends on the type of values in x and nfft. If x is real, length of s is (nfft/2 + 1) {Range of w = [0, pi]}. If nfft is even and (nfft+1)/2 {Range of w = [0, pi)} otherwise. If x is complex, length of s is nfft.
+   </para>
+   <para>
+   </para>
+   <para>
+</para>
+</refsection>
+
+<refsection>
+   <title>Examples</title>
+   <programlisting role="example"><![CDATA[
+// Pseudospectrum of two sinusoids with additive noise
+n = 0:249;
+x = sin(0.3*n*%pi) + sin(0.2*n*%pi) + 0.01*randn(size(n));
+[S, w] = pmusic(x, 4);
+// Using windowing
+n = 0:749;
+x = sin(0.25*n*%pi) + 0.05*randn(size(n));
+Xcorr =  corrmtx(x, 7, 'mod'); // Creating correlation matrix
+[S, w] = pmusic(Xm, 2);
+
+
+   ]]></programlisting>
+</refsection>
+
+<refsection>
+   <title>See also</title>
+   <simplelist type="inline">
+   <member><link linkend="pburg">pburg</link></member>
+   <member><link linkend="peig">peig</link></member>
+   <member><link linkend="periodogram">periodogram</link></member>
+   <member><link linkend="pmtm">pmtm</link></member>
+   <member><link linkend="prony">prony</link></member>
+   <member><link linkend="pwelch">pwelch</link></member>
+   <member><link linkend="rooteig">rooteig</link></member>
+   <member><link linkend="rootmusic">rootmusic</link></member>
+   </simplelist>
+</refsection>
+
+<refsection>
+   <title>Authors</title>
+   <simplelist type="vert">
+   <member>Ayush Baid</member>
+   </simplelist>
+</refsection>
+
+<refsection>
+   <title>Bibliography</title>
+   <para>[1] Petre Stoica and Randolph Moses, Introduction To Spectral Analysis, Prentice-Hall, 1997, pg. 15</para>
+   <para>[2] S. J. Orfanidis, Optimum Signal Processing, An Introduction. 2nd Ed., Macmillan, 1988.</para>
+</refsection>
+</refentry>

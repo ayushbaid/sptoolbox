@@ -58,6 +58,10 @@ M = cummax(v)
 <refsection>
    <title>See also</title>
    <simplelist type="inline">
+   <member><link linkend="cummax">cummax</link></member>
+   <member><link linkend="cumprod">cumprod</link></member>
+   <member><link linkend="cumsum">cumsum</link></member>
+   <member><link linkend="max">max</link></member>
    </simplelist>
 </refsection>
 

@@ -2,58 +2,47 @@
 function [w,pow] = rootmusic(x,p,varargin)
     // Frequencies and power of sinusoids using the root MUSIC algorithm
     //
+    //
     // Calling Sequence
     // w = rootmusic(x,p)
     // [w,pow] = rootmusic(x,p)
     // [f,pow] = rootmusc(...,fs)
     // [w,pow] = rootmusic(...,'corr')
     //
+    //
     // Parameters
-    // x - int|double - vector|matrix
-    //      Input signal.
-    //      If x is a vector, then it reprsenets one realization of the signal.
-    //      If x is a matrix, then each row represents a separate observation of
-    //      the signal. 
-    // p - int|double - scalar|2 element vector
-    //      p(1) is the signal subspace dimension and hence the number of 
-    //      complex exponentials in x.
-    //      p(2), if specified, represents a threshold that is multiplied by 
-    //      the smallest estimated eigenvalue of the signal's correlation 
-    //      matrix.
-    // fs - int|double - scalar
-    //      Sampling frequency (in Hz)
-    //      If fs is specified by an empty vector or unspecified, it defaults
-    //      to 1 Hz
-    // 'corr' flag
-    //      If specified, x is interpreted as a correlation matrix rather than
-    //      a matrix of the signal data. For x to be a correlation matrix, 
-    //      x must be a square matrix and all its eigenvalues must be 
-    //      nonnegative
+    // x: Input signal vector/matrix of a correlation matrix. If x is a vector, then it represents one realization of the signal. If x is a matrix, then each row represents a separate observation of the signal. For x to be a correlation matrix, x must be a square matrix and all its eigenvalues must be nonnegative
+    // p: p(1) is the signal subspace dimension and hence the number of complex exponentials in x. p(2), if specified, represents a threshold that is multiplied by the smallest estimated eigenvalue of the signal's correlation matrix.
+    // fs: Sampling frequency (in Hz). If fs is an empty vector or unspecified, it defaults to 1 Hz
+    // 'corr' flag: If specified, x is interpreted as a correlation matrix rather than a matrix of the signal data. 
+    // w: Estimated normalized frequencies of the complex sinusoids
+    // f: Estimated frequencies of the complex sinusoids
+    // pow - estimated absolute value squared amplitudes of the sinusoids at frequencies w 
     //
-    // Examples:
-    //      1) 3 complex exponentials:
     //
-    //          n=0:99;   
-    //          s=exp(1i*pi/2*n)+2*exp(1i*pi/4*n)+exp(1i*pi/3*n)+randn(1,100);  
-    //          [W,P] = rootmusic(s,3);
+    // Description
+    // rootmusic returns the frequencies in radians/sample for the p complex sinusoids that make up the input signal
     //
-    // Author
-    // Ayush
+    //
+    // Examples
+    // // An additive mixture of 3 complex exponentials
+    //      n=0:99;
+    //      s=exp(1%i*%pi/5*n) + 2*exp(1%i*%pi/4*n) + exp(1i*pi/2*n) + 0.5 * randn(1,100);  
+    //      [W,P] = rootmusic(s,3);
+    //
+    //
+    // Authors
+    // Ayush Baid
     //
     // See also
-    // corrmtx | peig | pmusic | rooteig
+    // corrmtx
+    // peig
+    // pmusic
+    // rooteig
     //
     // References
-    // 1) Monson H. Hayes, Statistical Digital Signal Processing And Modeling, 
-    // Wiley & Sons, Inc, [Section 8.6.3]
+    // [1] Monson H. Hayes, Statistical Digital Signal Processing And Modeling, Wiley & Sons, Inc, [Section 8.6.3]
     //
-    //
-    // Output arguments
-    // w - double - vector
-    //      Estimated frequencies of the complex sinusoids
-    // pow - double - vector
-    //      estimated absolute value squared amplitudes of the sinusoids at 
-    //      the frequencies w 
     //
     // Dependencies
     // lsqnonneg from Optimization toolbox (FOT)
@@ -234,8 +223,7 @@ function w = computeFreqs(noiseEigenvects,pEffective,EVFlag,eigenvals)
     // the polynomial formed with the noise eigenvectors
     //
     // Parameters
-    // noiseEigenvects - 
-    //      A matrix where noise eigenvectors are represented by each column
+    // noiseEigenvects: A matrix whose columns are noise eigenvectors
     // pEffective - 
     //      The effective dimension of the signal subspace
     // EVFlag - 
